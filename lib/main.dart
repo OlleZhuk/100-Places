@@ -11,7 +11,7 @@ final colorScheme = ColorScheme.fromSeed(
   // background: const Color.fromARGB(255, 56, 49, 66),
 );
 
-final theme = ThemeData().copyWith(
+final theme = ThemeData.dark().copyWith(
   colorScheme: colorScheme,
   scaffoldBackgroundColor: colorScheme.background,
   visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -74,7 +74,6 @@ final theme = ThemeData().copyWith(
         color: colorScheme.tertiary,
       )),
 );
-
 void main() => runApp(const ProviderScope(child: MyApp()));
 
 class MyApp extends StatelessWidget {

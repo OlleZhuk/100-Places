@@ -10,6 +10,7 @@ import '/models/place.dart';
 import '/providers/user_places.dart';
 import '/widgets/custom_fab.dart';
 import '/widgets/alert_dialogs.dart';
+import '../widgets/responsiveness.dart';
 import '/widgets/gradient_appbar.dart';
 import '/widgets/route_transition.dart';
 import 'add_place_scr.dart';
@@ -27,10 +28,6 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   late Future<void> _placesFuture;
   String sortCase = '';
   ColorScheme get cScheme => Theme.of(context).colorScheme;
-
-  // // List<Place> get userPlaces => ref.watch(userPlacesProvider);
-  // List<Place> get userPlaces => [];
-  // TextTheme get tTheme => Theme.of(context).textTheme;
 
   //* Виджет выпадающего меню сортировки
   Widget get popUpSortMenu => PopupMenuButton(
@@ -68,6 +65,14 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         });
       });
 
+  //* Резиновая панель приложений
+  double get scalableToolbarHeight {
+    final deviceHeight = MediaQuery.sizeOf(context).height;
+    final toolbarH = deviceHeight * .09;
+
+    return toolbarH;
+  }
+
   @override
   void initState() {
     _placesFuture = ref.read(userPlacesProvider.notifier).loadPlaces();
@@ -77,9 +82,6 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   @override
   Widget build(context) {
     List<Place> userPlaces = ref.watch(userPlacesProvider);
-    // final List<Place> userPlaces = [];
-    // final mediaQueryData = MediaQuery.of(context);
-    // final deviceSize = mediaQueryData.size;
     final tTheme = Theme.of(context).textTheme;
     final q = userPlaces.length;
     const double horPadds = 30;
@@ -163,7 +165,8 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 
     return Scaffold(
         appBar: AppBar(
-          toolbarHeight: 70,
+          // toolbarHeight: scalableToolbar.height,
+          toolbarHeight: scalableToolbarHeight,
           flexibleSpace: const GradientAppBar(),
           leading: popUpMainMenu,
           title: titleWidget,
@@ -226,6 +229,9 @@ class MainContent extends ConsumerWidget {
     final scrollController = ScrollController();
     final deviceWidth = MediaQuery.of(context).size.width;
     final imageWidth = deviceWidth * .42;
+    final offsetX = imageWidth * .92; //0.3864
+    final offsetY = imageWidth * .8; //0.336
+    final maxCAE = deviceWidth * .51;
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
 
@@ -256,7 +262,7 @@ class MainContent extends ConsumerWidget {
         child: GridView.builder(
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               childAspectRatio: 1 / 1,
-              maxCrossAxisExtent: deviceWidth * .51,
+              maxCrossAxisExtent: maxCAE,
             ),
             controller: scrollController,
             physics: const BouncingScrollPhysics(),
@@ -272,7 +278,7 @@ class MainContent extends ConsumerWidget {
                     //
                     child: Badge(
                         backgroundColor: cScheme.background.withOpacity(.6),
-                        offset: Offset(-imageWidth * .92, imageWidth * .8),
+                        offset: Offset(-offsetX, offsetY),
                         largeSize: 30,
                         //
                         label: SizedBox(

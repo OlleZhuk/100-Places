@@ -25,31 +25,45 @@ class AppInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('=== МСБ ЭОП!!! ===');
-
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
-    double fSize = 12;
-    double horPadds = 44;
+
+    //* Резиновые изделия
+    final deviceSize = MediaQuery.sizeOf(context);
+    //
+    double max(double first, double second) {
+      return first > second ? first : second;
+    }
+
+    double min(double first, double second) {
+      return first < second ? first : second;
+    }
+
+    final scaleSideW = min(deviceSize.width, deviceSize.height);
+    final scaleSideH = max(deviceSize.width, deviceSize.height);
+    //
+    final toolbarH = scaleSideH * .09;
+    final horPadds = scaleSideW * .12;
+    final setScaleFactor = scaleSideW * .0028;
 
     Widget topicText(String data) => Text(
           data,
-          style: TextStyle(fontSize: fSize),
+          textScaleFactor: setScaleFactor,
         );
 
     final List<Widget> topics = [
       topicText('Коллекция "100 Мест", версия 1.1.1'),
       topicText('Это приложение для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
       topicText('Временное хранение означает, что после очистки коллекции или после удаления приложения восстановить коллекцию не получится.'),
-      topicText('Тем не менее, у вас есть функция "Поделиться", чтобы не потерять самые важные Места. Яндекс вообще рекомендует хранить адреса не более 30 дней.'),
+      topicText('Тем не менее, у вас есть функция "Поделиться", чтобы не потерять самые важные Места.\n' '\n' 'Яндекс вообще рекомендует хранить полученный адрес не более 30 дней.'),
       Wrap(
         children: [
-          topicText('В приложении используется карта Яндекса в соответствии с'),
+          topicText('В приложении используется карта Яндекса в соответствии с принятыми'),
           InkWell(
             child: Text(
               'условиями.',
+              textScaleFactor: setScaleFactor,
               style: TextStyle(
-                fontSize: fSize,
                 color: cScheme.primaryContainer,
                 decoration: TextDecoration.underline,
               ),
@@ -59,7 +73,7 @@ class AppInfo extends StatelessWidget {
         ],
       ),
       topicText('Если Яндекс не выдаёт вам адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте местоположение вручную.'),
-      topicText('Разработчик разделяет удивление и негодование пользователя, получившего перед адресом внутри новых федеральных регионов упоминание о так называемой Украине.'),
+      topicText('Разработчик разделяет удивление и негодование пользователя, получившего после адресного запроса внутри новых федеральных регионов упоминание о бывшей Украине.'),
     ];
 
     return Scaffold(
@@ -68,7 +82,7 @@ class AppInfo extends StatelessWidget {
             'О приложении',
             style: TextStyle(fontSize: 30),
           ),
-          toolbarHeight: 70,
+          toolbarHeight: toolbarH,
           flexibleSpace: const GradientAppBar(),
         ),
         body: SingleChildScrollView(
@@ -126,8 +140,46 @@ class AppInfo extends StatelessWidget {
                     ),
               ),
               const Gap(20),
+              const MediaQueryImplementation(),
             ],
           ),
         ));
+  }
+}
+
+/// MediaQuery implementation
+class MediaQueryImplementation extends StatelessWidget {
+  const MediaQueryImplementation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final Brightness platformBrightness = MediaQuery.of(context).platformBrightness;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets viewInsets = MediaQuery.of(context).viewInsets;
+    final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
+    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
+    final bool accessibleNavigation = MediaQuery.of(context).accessibleNavigation;
+    final bool invertColors = MediaQuery.of(context).invertColors;
+    final bool highContrast = MediaQuery.of(context).highContrast;
+
+    return SizedBox(
+      child: Text('=====================\n'
+          'Служебная информация\n'
+          '------------------------------------------\n'
+          'Screen size: $screenSize\n'
+          'Device pixel ratio: $pixelRatio\n'
+          'Text scale factor: $textScaleFactor\n'
+          'Platform brightness: $platformBrightness\n'
+          'Padding: $padding\n'
+          'View insets: $viewInsets\n'
+          'System gesture insets: $systemGestureInsets\n'
+          'Always use 24-hour format: $alwaysUse24HourFormat\n'
+          'Accessible navigation: $accessibleNavigation\n'
+          'Invert colors: $invertColors\n'
+          'High contrast: $highContrast\n'),
+    );
   }
 }
