@@ -1,4 +1,5 @@
-import 'dart:ui';
+/// Меню диалога
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';

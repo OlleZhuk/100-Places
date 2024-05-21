@@ -29,7 +29,6 @@ dependencies:
   another_flutter_splash_screen: ^1.2.0
   super_bullet_list: ^0.0.3
   url_launcher: ^6.2.4
-  external_app_launcher: ^4.0.0
 
 dev_dependencies:
   flutter_test:

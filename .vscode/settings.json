@@ -1,0 +1,7 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "html.format.wrapLineLength": 0,
+    "editor.wordWrapColumn": 800,
+    "dart.lineLength": 800,
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

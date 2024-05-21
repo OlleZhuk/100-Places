@@ -24,7 +24,11 @@ class MapScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Выбрать Место'),
+          title: const Text(
+            'Выбрать Место',
+            style: TextStyle(fontSize: 30),
+          ),
+          toolbarHeight: 70,
           flexibleSpace: const GradientAppBar(),
           leading: BackButton(
             onPressed: () {
@@ -86,21 +90,27 @@ class OnMapAddressView extends ConsumerWidget {
             ),
             Flexible(
                 child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                //> если подтверждаем местоположение, то будет адрес с геокодера,
-                //> если нет, то остается текущий (стартовый) адрес Места
-                isConfirmedLocation ? address : startPointAddress,
-                textAlign: TextAlign.start,
-                softWrap: true,
-                style: TextStyle(
-                  color: cScheme.tertiary,
-                  fontSize: 14,
-                ),
-              ),
-            )),
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
 
-            //^ Мигающая кнопка сохранения
+                        /// если подтверждаем местоположение, то выводится адрес с геокодера,
+                        /// если нет, то остается текущий (стартовый) адрес Места
+                        isConfirmedLocation
+                            ? address.isNotEmpty
+                                ? address
+                                : '''
+Сегодня Яндекс не может предоставить адрес.
+Попробуйте завтра или воспользуйтесь ручным вводом.
+'''
+                            : startPointAddress,
+                        textAlign: TextAlign.start,
+                        softWrap: true,
+                        style: TextStyle(
+                          color: cScheme.tertiary,
+                          fontSize: 14,
+                        )))),
+
+            /// Мигающая кнопка сохранения
             Visibility(
                 visible: isConfirmedLocation ? true : false,
                 child: IconButton(
@@ -124,8 +134,9 @@ class OnMapAddressView extends ConsumerWidget {
                         Navigator.of(context).pop(gettingLoc);
                       } else {
                         Navigator.of(context).pop();
+
+                        /// Отправляем новую локацию в БД
                         if (address.isNotEmpty && currentDate.isNotEmpty) {
-                          /// Отправляем новую локацию в БД
                           await ref.read(userPlacesProvider.notifier).updateLocation(
                                 gettingLoc!.latitude.toString(),
                                 gettingLoc!.longitude.toString(),

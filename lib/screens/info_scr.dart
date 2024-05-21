@@ -1,9 +1,9 @@
 /// Экран "О приложении", ЭОП
 library;
 
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:gap/gap.dart';
 import 'package:super_bullet_list/bullet_list.dart';
 import 'package:super_bullet_list/bullet_style.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,10 +14,8 @@ class AppInfo extends StatelessWidget {
   const AppInfo({super.key});
 
   launchURL() async {
-    // const url = 'geo:55.755848,37.620409';
-    Uri url = Uri.parse('geo:');
-    // Uri url = Uri.parse('geo:55.755848,37.620409');
-    // Uri url = Uri.parse('https://yandex.ru/legal/maps_termsofuse/');
+    //<   индикатор бы загрузки, а то просто висим и ждем...
+    Uri url = Uri.parse('https://yandex.ru/legal/maps_termsofuse/');
     if (await launchUrl(url)) {
       await launchUrl(url);
     } else {
@@ -31,103 +29,105 @@ class AppInfo extends StatelessWidget {
 
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
+    double fSize = 12;
+    double horPadds = 44;
 
     Widget topicText(String data) => Text(
           data,
-          style: TextStyle(color: cScheme.tertiary),
+          style: TextStyle(fontSize: fSize),
         );
 
     final List<Widget> topics = [
-      topicText('Коллекция "100 Мест", версия 0.1.0'),
-      topicText('Приложение предназначено для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
+      topicText('Коллекция "100 Мест", версия 1.1.1'),
+      topicText('Это приложение для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
       topicText('Временное хранение означает, что после очистки коллекции или после удаления приложения восстановить коллекцию не получится.'),
-      topicText('Тем не менее, вы всегда можете воспоьлзоваться функцией "Поделиться". Лучше всего хранить Места не более 30 дней.'),
+      topicText('Тем не менее, у вас есть функция "Поделиться", чтобы не потерять самые важные Места. Яндекс вообще рекомендует хранить адреса не более 30 дней.'),
       Wrap(
         children: [
-          topicText('В приложении используется карта Яндекса в строгом соответствии с'),
-          topicText('принятыми '),
+          topicText('В приложении используется карта Яндекса в соответствии с'),
           InkWell(
-            child: Text('условиями.',
-                style: TextStyle(
-                  color: cScheme.primaryContainer,
-                  decoration: TextDecoration.underline,
-                )),
-            onTap: () async {
-              await LaunchApp.openApp(
-                androidPackageName: 'ru.nspk.mirpay',
-                appStoreLink: 'https://www.rustore.ru/catalog/app/ru.nspk.mirpay',
-                openStore: true,
-              );
-            },
-            // onTap: () => launchURL(),
-          )
+            child: Text(
+              'условиями.',
+              style: TextStyle(
+                fontSize: fSize,
+                color: cScheme.primaryContainer,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            onTap: () => launchURL(),
+          ),
         ],
       ),
+      topicText('Если Яндекс не выдаёт вам адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте местоположение вручную.'),
+      topicText('Разработчик разделяет удивление и негодование пользователя, получившего перед адресом внутри новых федеральных регионов упоминание о так называемой Украине.'),
     ];
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('О приложении'),
+          title: const Text(
+            'О приложении',
+            style: TextStyle(fontSize: 30),
+          ),
+          toolbarHeight: 70,
           flexibleSpace: const GradientAppBar(),
         ),
-        body: Center(
-            child: Column(
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                    child: Text(
-                  '100',
-                  textScaleFactor: 1,
-                  style: tTheme.displayLarge!.copyWith(
-                    color: cScheme.primaryContainer.withOpacity(.9),
-                  ),
-                ).animate().fadeIn(duration: 2.seconds).scale(
-                          duration: 2.seconds,
-                          curve: Curves.easeOutBack,
-                        )),
-                Positioned(
-                    top: 50,
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 15.0),
-                        child: Text('мест',
-                            textScaleFactor: 7.5,
-                            style: tTheme.titleMedium!.copyWith(
-                              color: cScheme.background,
-                              fontWeight: FontWeight.w900,
-                            )).animate().fadeIn(duration: 3.seconds)))
-              ],
-            ),
-            Expanded(
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 45),
-                    child: SizedBox(
-                      child: SuperBulletList(
-                        isOrdered: false,
-                        style: BulletStyle.discFill,
-                        iconColor: cScheme.tertiary,
-                        iconSize: 5,
-                        // customBullet: const Text('🔥'),
-                        gap: 10,
-                        items: topics,
-                      )
-                          .animate(delay: 1.seconds)
-                          .fadeIn(
-                            duration: 900.ms,
-                            delay: 300.ms,
-                          )
-                          .shimmer(
-                            duration: 1.seconds,
-                            blendMode: BlendMode.srcOver,
-                            color: Colors.white12,
-                          )
-                          .move(
-                            begin: const Offset(-30, 0),
-                            curve: Curves.easeOutQuad,
-                          ),
-                    )))
-          ],
-        )));
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Positioned(
+                      child: Text(
+                    '100',
+                    style: tTheme.displayLarge!.copyWith(
+                      fontSize: 126,
+                    ),
+                  ).animate().fadeIn(duration: 2.seconds).scale(
+                            duration: 2.seconds,
+                            curve: Curves.easeOutBack,
+                          )),
+                  Positioned(
+                      bottom: 14,
+                      child: Text(
+                        'МЕСТ',
+                        style: tTheme.titleMedium!.copyWith(
+                          fontSize: 86,
+                        ),
+                      ).animate().fadeIn(duration: 3.seconds))
+                ],
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horPadds,
+                ),
+                child: SuperBulletList(
+                  isOrdered: false,
+                  style: BulletStyle.discFill,
+                  iconColor: cScheme.tertiary,
+                  iconSize: 5,
+                  // customBullet: const Text('🔥'),
+                  gap: 10,
+                  items: topics,
+                )
+                    .animate(delay: 1.seconds)
+                    .fadeIn(
+                      duration: 900.ms,
+                      delay: 300.ms,
+                    )
+                    .shimmer(
+                      duration: 1.seconds,
+                      blendMode: BlendMode.srcOver,
+                      color: Colors.white12,
+                    )
+                    .move(
+                      begin: const Offset(-30, 0),
+                      curve: Curves.easeOutQuad,
+                    ),
+              ),
+              const Gap(20),
+            ],
+          ),
+        ));
   }
 }

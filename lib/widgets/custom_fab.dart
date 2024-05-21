@@ -14,22 +14,27 @@ class CustomFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cScheme = Theme.of(context).colorScheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final double deviceSize = MediaQuery.of(context).size.width;
 
-    return FilledButton.tonalIcon(
-      label: Text(labelText),
-      style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 50),
-          backgroundColor: cScheme.onPrimary.withOpacity(0.75),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          )),
-      icon: Icon(
-        buttonIcon,
-        color: cScheme.primary,
-        size: 30,
+    return SizedBox(
+      width: deviceSize * .94,
+      child: FilledButton.tonalIcon(
+        label: Text(labelText),
+        style: FilledButton.styleFrom(
+            elevation: 3,
+            backgroundColor: cScheme.primaryContainer.withOpacity(.8),
+            // backgroundColor: cScheme.onPrimary.withOpacity(0.75),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            )),
+        icon: Icon(
+          buttonIcon,
+          color: cScheme.primary,
+          size: 30,
+        ),
+        onPressed: action,
       ),
-      onPressed: action,
     );
   }
 }

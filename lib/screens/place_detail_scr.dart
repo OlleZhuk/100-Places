@@ -210,6 +210,7 @@ ${place.location.longitude.toString()}
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: TitleView(currentPlace: place),
+        toolbarHeight: 70,
         leading: BackButton(
           onPressed: () {
             ref.read(isEditTitleProvider.notifier).state = false;
@@ -282,10 +283,10 @@ class TitleView extends ConsumerWidget {
         maxLines: 2,
         style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: Theme.of(context).colorScheme.primary,
-              fontSize: 30,
+              fontSize: 32,
               height: .9,
             ),
-      ).animate(delay: 1.seconds).shakeX(),
+      ).animate(delay: 1.seconds).shakeX(duration: 200.ms),
     );
   }
 }

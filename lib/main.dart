@@ -17,7 +17,6 @@ final theme = ThemeData().copyWith(
   visualDensity: VisualDensity.adaptivePlatformDensity,
   //
   appBarTheme: AppBarTheme(
-    toolbarHeight: 70,
     backgroundColor: colorScheme.onPrimary,
     foregroundColor: colorScheme.primary,
   ),
@@ -33,37 +32,39 @@ final theme = ThemeData().copyWith(
   ),
   //
   popupMenuTheme: PopupMenuThemeData(
-    position: PopupMenuPosition.under,
-    color: colorScheme.onPrimary,
-    textStyle: ThemeData().textTheme.bodyMedium!.copyWith(
-          color: colorScheme.primary,
-        ),
-  ),
+      position: PopupMenuPosition.under,
+      color: colorScheme.onPrimary,
+      elevation: 6,
+      textStyle: TextStyle(
+        color: colorScheme.primary,
+      )),
   //
   textTheme: ThemeData().textTheme.copyWith(
-        titleSmall: TextStyle(
-          fontFamily: 'UbuntuCondensed',
-          color: colorScheme.tertiary,
-          fontSize: 16,
-        ),
-        titleMedium: TextStyle(
-          // fontFamily: 'UbuntuCondensed',
-          fontFamily: 'AlumniSans',
-          color: colorScheme.primary,
-          fontSize: 20,
-        ),
-        titleLarge: const TextStyle(
-          fontFamily: 'AlumniSans',
-          fontWeight: FontWeight.w300,
-          fontSize: 35,
-        ),
-        displayLarge: const TextStyle(
+        bodyMedium: TextStyle(
+          color: colorScheme.tertiary.withOpacity(.8),
+        ), // обычный текст на экране
+        displayLarge: TextStyle(
           fontFamily: 'AlumniSans',
           fontWeight: FontWeight.w900,
-          fontSize: 200,
+          color: colorScheme.primaryContainer.withOpacity(.9),
         ),
         headlineSmall: const TextStyle(
           fontSize: 16,
+        ),
+        titleSmall: TextStyle(
+          fontFamily: 'AlumniSans',
+          color: colorScheme.tertiary,
+          fontSize: 16, //^ названия на картинках
+        ),
+        titleMedium: TextStyle(
+          fontFamily: 'AlumniSans',
+          color: colorScheme.background,
+          fontWeight: FontWeight.w900, //^ "мест"
+        ),
+        titleLarge: TextStyle(
+          fontFamily: 'AlumniSans',
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w200,
         ),
       ),
   badgeTheme: BadgeThemeData(textColor: colorScheme.primary),

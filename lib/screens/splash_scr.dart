@@ -12,12 +12,12 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme cScheme = Theme.of(context).colorScheme;
-    final TextTheme tTheme = Theme.of(context).textTheme;
+    final cScheme = Theme.of(context).colorScheme;
+    final tTheme = Theme.of(context).textTheme;
 
     return FlutterSplashScreen(
         useImmersiveMode: true,
-        duration: 5.seconds,
+        duration: 4.seconds,
         backgroundColor: cScheme.background,
         nextScreen: const PlacesScreen(),
         splashScreenBody: Center(
@@ -25,36 +25,29 @@ class SplashScreen extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Positioned(
-                child: Text(
-              '100',
-              textScaleFactor: 1.2,
-              style: tTheme.displayLarge!.copyWith(
-                color: cScheme.primaryContainer.withOpacity(.9),
-              ),
-            )
-                    .animate()
-                    .fadeIn(duration: 4.seconds)
-                    .scale(
-                      duration: 4.seconds,
-                      curve: Curves.easeOutBack,
-                    )
-                    .fadeOut(
-                      delay: 4.seconds,
-                      duration: 1.seconds,
-                    )),
+              child: Text(
+                '100',
+                style: tTheme.displayLarge!.copyWith(
+                  fontSize: 256,
+                ),
+              )
+                  .animate()
+                  .scale(
+                    duration: 3.seconds,
+                    curve: Curves.easeInOutBack,
+                  )
+                  .fadeOut(
+                    delay: 2.seconds,
+                    duration: 2.seconds,
+                  ),
+            ),
             Positioned(
-                top: 58,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: Text(
-                    'мест',
-                    textScaleFactor: 9,
-                    style: tTheme.titleMedium!.copyWith(
-                      color: cScheme.background,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ).animate().fadeIn(duration: 4.seconds),
-                ))
+                child: Text(
+              'МЕСТ',
+              style: tTheme.titleMedium!.copyWith(
+                fontSize: 135,
+              ),
+            ))
           ],
         )));
   }

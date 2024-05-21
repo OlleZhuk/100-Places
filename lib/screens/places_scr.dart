@@ -7,9 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '/models/place.dart';
-import '../providers/user_places.dart';
+import '/providers/user_places.dart';
 import '/widgets/custom_fab.dart';
-import '../widgets/alert_dialogs.dart';
+import '/widgets/alert_dialogs.dart';
 import '/widgets/gradient_appbar.dart';
 import '/widgets/route_transition.dart';
 import 'add_place_scr.dart';
@@ -25,51 +25,12 @@ class PlacesScreen extends ConsumerStatefulWidget {
 
 class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   late Future<void> _placesFuture;
-  String _sortCase = '';
-
-  List<Place> get userPlaces => ref.watch(userPlacesProvider);
+  String sortCase = '';
   ColorScheme get cScheme => Theme.of(context).colorScheme;
-  TextTheme get tTheme => Theme.of(context).textTheme;
-  double get deviceHeigh => MediaQuery.sizeOf(context).height;
 
-  //* Виджет выпадающего основного меню
-  Widget get popUpMainMenu => PopupMenuButton(
-      offset: const Offset(0, -10),
-      icon: Icon(
-        Icons.menu,
-        size: 30,
-        color: cScheme.inversePrimary,
-      ),
-      itemBuilder: (ctx) => [
-            PopupMenuItem(
-              child: const Row(
-                children: [
-                  Icon(Icons.phonelink_erase),
-                  Gap(10),
-                  Flexible(child: Text('Очистить коллекцию')),
-                ],
-              ).animate().flipH(duration: 300.ms),
-              onTap: () => showDialog(
-                  context: context,
-                  builder: (context) => ConfirmAlert(
-                      question: 'Удалить сразу все Места?',
-                      event: () async {
-                        Navigator.of(context).pop();
-                        await ref.read(userPlacesProvider.notifier).clearDB();
-                      })),
-            ),
-            PopupMenuItem(
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline),
-                    Gap(10),
-                    Flexible(child: Text('О приложении')),
-                  ],
-                ).animate().flipH(duration: 500.ms),
-                onTap: () => Navigator.of(context).push(MyRouteTransition(
-                      const AppInfo(),
-                    ))),
-          ]);
+  // // List<Place> get userPlaces => ref.watch(userPlacesProvider);
+  // List<Place> get userPlaces => [];
+  // TextTheme get tTheme => Theme.of(context).textTheme;
 
   //* Виджет выпадающего меню сортировки
   Widget get popUpSortMenu => PopupMenuButton(
@@ -103,24 +64,82 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
           ],
       onSelected: (String value) {
         setState(() {
-          _sortCase = value;
+          sortCase = value;
         });
       });
 
-  //* Виджет заголовка панели приложений
-  Widget get titleWidget {
-    final q = userPlaces.length;
+  @override
+  void initState() {
+    _placesFuture = ref.read(userPlacesProvider.notifier).loadPlaces();
+    super.initState();
+  }
 
-    return Row(
+  @override
+  Widget build(context) {
+    List<Place> userPlaces = ref.watch(userPlacesProvider);
+    // final List<Place> userPlaces = [];
+    // final mediaQueryData = MediaQuery.of(context);
+    // final deviceSize = mediaQueryData.size;
+    final tTheme = Theme.of(context).textTheme;
+    final q = userPlaces.length;
+    const double horPadds = 30;
+
+    //* Виджет выпадающего основного меню
+    final popUpMainMenu = PopupMenuButton(
+        offset: const Offset(0, -10),
+        icon: Icon(
+          Icons.menu,
+          size: 30,
+          color: cScheme.inversePrimary,
+        ),
+        itemBuilder: (ctx) => [
+              PopupMenuItem(
+                enabled: userPlaces.isNotEmpty ? true : false,
+                child: const Row(
+                  children: [
+                    Icon(Icons.phonelink_erase),
+                    Gap(10),
+                    Flexible(child: Text('Очистить коллекцию')),
+                  ],
+                ).animate().flipH(duration: 300.ms),
+                onTap: () => showDialog(
+                    context: context,
+                    builder: (context) => ConfirmAlert(
+                        question: 'Удалить сразу все Места?',
+                        event: () async {
+                          Navigator.of(context).pop();
+                          await ref.read(userPlacesProvider.notifier).clearDB();
+                        })),
+              ),
+              PopupMenuItem(
+                  child: const Row(
+                    children: [
+                      Icon(Icons.info_outline),
+                      Gap(10),
+                      Flexible(child: Text('О приложении')),
+                    ],
+                  ).animate().flipH(duration: 500.ms),
+                  onTap: () => Navigator.of(context).push(MyRouteTransition(
+                        const AppInfo(),
+                      ))),
+            ]);
+
+    //* Виджет заголовка панели приложений
+    final titleWidget = Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Icon(
           Icons.local_see_rounded,
           color: cScheme.primary,
-          size: 35,
+          size: 30,
         ),
         const Gap(12),
-        const Text('100'),
+        Text(
+          '100',
+          style: tTheme.titleLarge!.copyWith(
+            fontSize: 30,
+          ),
+        ),
         const Gap(10),
         Badge.count(
             largeSize: 18,
@@ -133,47 +152,31 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
             //
             child: Text('Мест',
                 style: tTheme.titleLarge!.copyWith(
-                  color: cScheme.primary,
+                  fontSize: 30,
                   fontWeight: FontWeight.w600,
                 )))
       ],
     );
-  }
 
-  @override
-  void initState() {
-    _placesFuture = ref.read(userPlacesProvider.notifier).loadPlaces();
-    super.initState();
-  }
-
-  @override
-  Widget build(context) {
     print('=== МСБ ЭСМ!!! ===');
+    // print('=== $horPadds ===');
 
     return Scaffold(
-        appBar: userPlaces.isNotEmpty
-            ? AppBar(
-                flexibleSpace: const GradientAppBar(),
-                leading: popUpMainMenu,
-                title: titleWidget,
-                actions: [popUpSortMenu],
-              )
-            : null,
+        appBar: AppBar(
+          toolbarHeight: 70,
+          flexibleSpace: const GradientAppBar(),
+          leading: popUpMainMenu,
+          title: titleWidget,
+          actions: [popUpSortMenu],
+        ),
         body: userPlaces.isEmpty
             ? Center(
-                child: Image.asset(
-                'assets/camera-overlay.webp',
-              )
-                    .animate()
-                    .scaleY(
-                      duration: 1.seconds,
-                      curve: Curves.easeOutBack,
-                    )
-                    .scaleX(
-                      delay: 1.seconds,
-                      duration: 2.seconds,
-                      curve: Curves.easeOutBack,
-                    ))
+                heightFactor: 1.72,
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: horPadds),
+                    child: Image.asset(
+                      'assets/camera-overlay.webp',
+                    ).animate().fadeIn(duration: 1.seconds)))
             : FutureBuilder(
                 future: _placesFuture,
                 builder: (
@@ -182,13 +185,11 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                 ) =>
                     snapshot.connectionState == ConnectionState.waiting
                         ? CircularProgressIndicator(color: cScheme.primary)
-                        : SafeArea(
-                            child: ShaderMaskDecoration(
-                                child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 7),
-                              child: MainContent(sortCase: _sortCase),
-                            )),
-                          )),
+                        : ShaderMaskDecoration(
+                            child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 7),
+                            child: MainContent(sortCase: sortCase),
+                          ))),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: CustomFAB(
                 labelText: 'Добавить Место',
@@ -209,7 +210,8 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 }
 
 /// ВИДЖЕТЫ
-/// -------------------------------------
+///
+//* _MainContent_ ------------------------
 class MainContent extends ConsumerWidget {
   const MainContent({
     super.key,
@@ -220,8 +222,6 @@ class MainContent extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    print('=== МСБ MainContent ЭСМ!!! ===');
-
     final userPlaces = ref.watch(userPlacesProvider);
     final scrollController = ScrollController();
     final deviceWidth = MediaQuery.of(context).size.width;
@@ -229,7 +229,7 @@ class MainContent extends ConsumerWidget {
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
 
-    //^ варианты сортировки
+    /// Варианты сортировки
     switch (sortCase) {
       case "AZ":
         userPlaces.sort((a, b) => a.title.compareTo(b.title));
@@ -248,6 +248,8 @@ class MainContent extends ConsumerWidget {
         break;
     }
 
+    print('=== МСБ MainContent ЭСМ!!! ===');
+
     /// Сетка картинок и скролл-бар
     return Scrollbar(
         controller: scrollController,
@@ -261,13 +263,10 @@ class MainContent extends ConsumerWidget {
             itemCount: userPlaces.length,
             itemBuilder: (ctx, index) => GestureDetector(
                 //
-                //^ Переход на экран детализации
                 onTap: () => Navigator.of(context).push(MyRouteTransition(
                       PlaceDetailScreen(place: userPlaces[index]),
                     )),
-
-                //^ Основной контент:
-                //^ картинка с бейджиком-названием
+                //
                 child: Padding(
                     padding: const EdgeInsets.all(2.0),
                     //
@@ -300,9 +299,7 @@ class MainContent extends ConsumerWidget {
   }
 }
 
-/// ------------------------------------------------
-/// Верхнее и нижнее затемнения
-
+//* _ShaderMaskDecoration_ -------------------------
 class ShaderMaskDecoration extends StatelessWidget {
   const ShaderMaskDecoration({super.key, required this.child});
 

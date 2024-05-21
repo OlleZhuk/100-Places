@@ -13,6 +13,6 @@ class GradientAppBar extends StatelessWidget {
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        stops: const [0.7, 1],
+        stops: const [0.75, 1],
       )));
 }
