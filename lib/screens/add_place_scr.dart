@@ -18,7 +18,6 @@ import '/providers/geocoder.dart';
 import '/providers/user_places.dart';
 import '/widgets/alert_dialogs.dart';
 import '/widgets/custom_fab.dart';
-import '/widgets/gradient_appbar.dart';
 import '/widgets/route_transition.dart';
 import 'map_scr.dart';
 
@@ -27,16 +26,15 @@ class AddPlaceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    print('=== МСБ ЭДМ!!! ===');
-
+    PlaceLocation? selectedLocation;
+    File? selectedImage;
+    final deviceHeight = MediaQuery.sizeOf(context).height;
+    final toolbarH = deviceHeight * .09;
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
     final titleController = TextEditingController();
-    PlaceLocation? selectedLocation;
-    File? selectedImage;
-
-    final Color labelOpacity = cScheme.tertiary.withOpacity(.5);
-    double iconSize = 35;
+    final labelOpacity = cScheme.tertiary.withOpacity(.5);
+    const double iconSize = 35;
 
     //* Метод сохранения Места (кн. 'Сохранить')
     Future<void> savePlace() async {
@@ -70,10 +68,11 @@ class AddPlaceScreen extends ConsumerWidget {
       }
     }
 
+    print('=== МСБ ЭДМ!!! ===');
+
     return Scaffold(
       appBar: AppBar(
-          toolbarHeight: 70,
-          flexibleSpace: const GradientAppBar(),
+          toolbarHeight: toolbarH,
           title: const Text(
             'Новое Место:',
             style: TextStyle(fontSize: 30),
@@ -199,10 +198,13 @@ class _ImageInputState extends State<ImageInput> {
 
   @override
   Widget build(BuildContext context) {
+    const double gap = 14;
+
     print('=== МСБ ImageInput!!! ===');
 
     return Row(
       children: [
+        /// Место для изобпажения
         Container(
           width: deviceWidth * .5,
           height: deviceWidth * .5,
@@ -234,44 +236,45 @@ class _ImageInputState extends State<ImageInput> {
                   ))
               : null,
         ),
-        const Gap(8),
+        const Gap(gap),
+
+        /// Выбор источника
         Expanded(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.camera,
-                size: widget.iconSz,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.camera, size: widget.iconSz),
+                    const Gap(gap),
+                    const Text('Сделать\n' 'снимок'),
+                  ],
+                ),
+                onTap: () {
+                  isCamera = true;
+                  _takePicture();
+                },
               ),
-              iconColor: cScheme.primary,
-              title: const Text('Сделать снимок'),
-              titleTextStyle: tTheme.titleMedium!.copyWith(
-                fontSize: 16,
+              const Gap(gap * 2.5),
+              InkWell(
+                child: Row(
+                  children: [
+                    Icon(Icons.wallpaper, size: widget.iconSz),
+                    const Gap(gap),
+                    const Text('Взять из\n' 'галереи'),
+                  ],
+                ),
+                onTap: () {
+                  isCamera = false;
+                  _takePicture();
+                },
               ),
-              onTap: () {
-                isCamera = true;
-                _takePicture();
-              },
-            ),
-            const Gap(16),
-            ListTile(
-              leading: Icon(
-                Icons.wallpaper,
-                size: widget.iconSz,
-              ),
-              iconColor: cScheme.primary,
-              title: const Text('Взять из галереи'),
-              titleTextStyle: tTheme.titleMedium!.copyWith(
-                fontSize: 16,
-              ),
-              onTap: () {
-                isCamera = false;
-                _takePicture();
-              },
-            ),
-          ],
-        ))
+            ],
+          ),
+        )
       ],
     );
   }
@@ -400,11 +403,6 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
     await showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      // shape: const RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.vertical(
-      //   top: Radius.circular(20),
-      //   bottom: Radius.zero,
-      // )),
       context: ctx,
       builder: (BuildContext ctx) {
         return ClipPath(
@@ -462,45 +460,57 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
 
   @override
   Widget build(BuildContext context) {
+    const double gap = 34;
+
     print('=== МСБ LocationInput! ===');
 
     return Column(
       children: [
         //
         /// Местоположение
-        Card(
-            color: cScheme.background,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                  width: 1.6,
-                  color: cScheme.primary.withOpacity(.2),
-                )),
-            child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 22,
-                ),
-                child: Row(
-                  children: [
-                    !isCreatingLocation
-                        ? Text(
-                            'Местоположение:',
-                            style: tTheme.titleSmall!.copyWith(
-                              color: widget.labelOpc,
-                            ),
-                          )
-                        : _pickedLocation == null
-                            ? const CircularProgressIndicator()
-                            : Expanded(
-                                child: Text(
-                                _pickedLocation!.address,
-                                style: tTheme.titleSmall,
-                              ))
-                  ],
-                ))),
-        const Gap(16),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: cScheme.primary.withOpacity(.2),
+              width: 1.6,
+            ),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+          child: !isCreatingLocation
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 22,
+                  ),
+                  child: Text(
+                    'Местоположение:',
+                    style: tTheme.titleSmall!.copyWith(
+                      color: widget.labelOpc,
+                    ),
+                  ),
+                )
+              : _pickedLocation == null
+                  ? const Center(
+                      child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: CircularProgressIndicator(),
+                    ))
+                  : Expanded(
+                      child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 12,
+                      ),
+                      child: Text(
+                        _pickedLocation!.address,
+                        // style: tTheme.titleSmall,
+                      ),
+                    )),
+        ),
+        const Gap(gap / 2),
 
         /// Кнопки выбора местоположения
         //
@@ -510,41 +520,46 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
             //
             /// Текущее
             InkWell(
-                onTap: getUserLocation,
-                child: TextAndIcon(
-                  iconSz: widget.iconSz,
-                  text: 'Текущее',
-                  icon: Icons.location_on,
-                )),
-            const Gap(34),
+              onTap: getUserLocation,
+              child: Column(
+                children: [
+                  Icon(Icons.location_on, size: widget.iconSz),
+                  const Text('Текущее'),
+                ],
+              ), // TextAndIcon(
+            ),
+            const Gap(gap),
 
             /// На карте
             InkWell(
-                onTap: getOnMapLocation,
-                child: TextAndIcon(
-                  iconSz: widget.iconSz,
-                  text: 'На карте',
-                  icon: Icons.map,
-                )),
+              onTap: getOnMapLocation,
+              child: Column(
+                children: [
+                  Icon(Icons.map, size: widget.iconSz),
+                  const Text('На карте'),
+                ],
+              ),
+            ),
 
             /// Вручную
             Visibility(
               visible: isCreatingLocation ? true : false,
-              child: const Gap(34),
+              child: const Gap(gap),
             ),
-
             Visibility(
               visible: isCreatingLocation ? true : false,
               child: InkWell(
-                      onTap: () {
-                        ref.read(sourseLocationProvider.notifier).state = 'man';
-                        manuallyAddressInput(context);
-                      },
-                      child: TextAndIcon(
-                        iconSz: widget.iconSz,
-                        text: 'Вручную',
-                        icon: Icons.edit_note,
-                      ))
+                onTap: () {
+                  ref.read(sourseLocationProvider.notifier).state = 'man';
+                  manuallyAddressInput(context);
+                },
+                child: Column(
+                  children: [
+                    Icon(Icons.edit_note, size: widget.iconSz),
+                    const Text('Вручную'),
+                  ],
+                ),
+              )
                   .animate()
                   .fadeIn(
                     duration: 900.ms,
@@ -583,41 +598,4 @@ class CustomClipPath extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-//* _TextAndIcon_ --------------------------------
-class TextAndIcon extends StatelessWidget {
-  const TextAndIcon({
-    super.key,
-    required this.text,
-    required this.icon,
-    required this.iconSz,
-  });
-
-  final String text;
-  final IconData icon;
-  final double iconSz;
-
-  @override
-  Widget build(BuildContext context) {
-    final cScheme = Theme.of(context).colorScheme;
-    const double gap = 32;
-
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: [
-        Padding(
-            padding: const EdgeInsets.only(top: gap),
-            child: Text(
-              text,
-              style: TextStyle(color: cScheme.primary),
-            )),
-        Icon(
-          icon,
-          color: cScheme.primary,
-          size: iconSz,
-        )
-      ],
-    );
-  }
 }

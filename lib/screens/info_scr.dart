@@ -8,7 +8,7 @@ import 'package:super_bullet_list/bullet_list.dart';
 import 'package:super_bullet_list/bullet_style.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '/widgets/gradient_appbar.dart';
+import '/widgets/shader_mask_decoration.dart';
 
 class AppInfo extends StatelessWidget {
   const AppInfo({super.key});
@@ -28,41 +28,23 @@ class AppInfo extends StatelessWidget {
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
 
-    //* Резиновые изделия
-    final deviceSize = MediaQuery.sizeOf(context);
-    //
-    double max(double first, double second) {
-      return first > second ? first : second;
-    }
-
-    double min(double first, double second) {
-      return first < second ? first : second;
-    }
-
-    final scaleSideW = min(deviceSize.width, deviceSize.height);
-    final scaleSideH = max(deviceSize.width, deviceSize.height);
-    //
-    final toolbarH = scaleSideH * .09;
-    final horPadds = scaleSideW * .12;
-    final setScaleFactor = scaleSideW * .0028;
-
     Widget topicText(String data) => Text(
           data,
-          textScaleFactor: setScaleFactor,
+          textScaleFactor: 1,
         );
 
     final List<Widget> topics = [
       topicText('Коллекция "100 Мест", версия 1.1.1'),
       topicText('Это приложение для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
       topicText('Временное хранение означает, что после очистки коллекции или после удаления приложения восстановить коллекцию не получится.'),
-      topicText('Тем не менее, у вас есть функция "Поделиться", чтобы не потерять самые важные Места.\n' '\n' 'Яндекс вообще рекомендует хранить полученный адрес не более 30 дней.'),
+      topicText('Тем не менее, у вас есть функция "Поделиться", чтобы не потерять самые важные Места.\n' 'Яндекс вообще рекомендует хранить полученный адрес не более 30 дней.'),
       Wrap(
         children: [
-          topicText('В приложении используется карта Яндекса в соответствии с принятыми'),
+          topicText('В приложении используется карта Яндекса в соответствии с принятыми '),
           InkWell(
             child: Text(
               'условиями.',
-              textScaleFactor: setScaleFactor,
+              textScaleFactor: 1,
               style: TextStyle(
                 color: cScheme.primaryContainer,
                 decoration: TextDecoration.underline,
@@ -73,52 +55,66 @@ class AppInfo extends StatelessWidget {
         ],
       ),
       topicText('Если Яндекс не выдаёт вам адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте местоположение вручную.'),
-      topicText('Разработчик разделяет удивление и негодование пользователя, получившего после адресного запроса внутри новых федеральных регионов упоминание о бывшей Украине.'),
+      topicText('Разработчик разделяет удивление и негодование пользователя, получившего от Яндекс Карт принадлежность новых федеральных регионов по-прежнему Украине.'),
     ];
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'О приложении',
-            style: TextStyle(fontSize: 30),
-          ),
-          toolbarHeight: toolbarH,
-          flexibleSpace: const GradientAppBar(),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Positioned(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 180,
+            backgroundColor: cScheme.background,
+            floating: true,
+            flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.8,
+              background: Container(color: cScheme.background),
+              title: ShaderMaskDecoration(
+                child: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(),
+                    Positioned(
+                      bottom: -30,
+                      right: 0,
                       child: Text(
-                    '100',
-                    style: tTheme.displayLarge!.copyWith(
-                      fontSize: 126,
-                    ),
-                  ).animate().fadeIn(duration: 2.seconds).scale(
+                        '100',
+                        style: tTheme.displayLarge!.copyWith(
+                          fontSize: 110,
+                        ),
+                      ).animate().fadeIn(duration: 1.seconds).scale(
                             duration: 2.seconds,
                             curve: Curves.easeOutBack,
-                          )),
-                  Positioned(
-                      bottom: 14,
+                          ),
+                    ),
+                    Positioned(
+                      bottom: -15,
+                      right: 0,
                       child: Text(
                         'МЕСТ',
+                        // textAlign: TextAlign.right,
                         style: tTheme.titleMedium!.copyWith(
-                          fontSize: 86,
+                          fontSize: 58,
                         ),
-                      ).animate().fadeIn(duration: 3.seconds))
-                ],
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horPadds,
+                      ).animate().fadeIn(duration: 2.seconds),
+                    ),
+                  ],
                 ),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: Gap(10),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 40,
+              ),
+              child: SizedBox(
                 child: SuperBulletList(
                   isOrdered: false,
                   style: BulletStyle.discFill,
-                  iconColor: cScheme.tertiary,
+                  iconColor: cScheme.tertiary.withOpacity(.7),
                   iconSize: 5,
                   // customBullet: const Text('🔥'),
                   gap: 10,
@@ -135,15 +131,24 @@ class AppInfo extends StatelessWidget {
                       color: Colors.white12,
                     )
                     .move(
-                      begin: const Offset(-30, 0),
+                      begin: const Offset(30, 0),
                       curve: Curves.easeOutQuad,
                     ),
               ),
-              const Gap(20),
-              const MediaQueryImplementation(),
-            ],
+            ),
           ),
-        ));
+          const SliverToBoxAdapter(
+            child: Gap(10),
+          ),
+          const SliverToBoxAdapter(
+            child: MediaQueryImplementation(),
+          ),
+          const SliverToBoxAdapter(
+            child: Gap(100),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -153,33 +158,40 @@ class MediaQueryImplementation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
-    final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final Brightness platformBrightness = MediaQuery.of(context).platformBrightness;
-    final EdgeInsets padding = MediaQuery.of(context).padding;
-    final EdgeInsets viewInsets = MediaQuery.of(context).viewInsets;
-    final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
-    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
-    final bool accessibleNavigation = MediaQuery.of(context).accessibleNavigation;
-    final bool invertColors = MediaQuery.of(context).invertColors;
-    final bool highContrast = MediaQuery.of(context).highContrast;
+    final Size virtualScreenSize = MediaQuery.sizeOf(context);
+    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final double currentDPI = 160 * pixelRatio;
+    final Size realScreenSize = virtualScreenSize * pixelRatio;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
+    final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(context);
+    final EdgeInsets systemGestureInsets = MediaQuery.systemGestureInsetsOf(context);
+    final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
+    final bool invertColors = MediaQuery.invertColorsOf(context);
+    final bool highContrast = MediaQuery.highContrastOf(context);
 
-    return SizedBox(
-      child: Text('=====================\n'
-          'Служебная информация\n'
-          '------------------------------------------\n'
-          'Screen size: $screenSize\n'
-          'Device pixel ratio: $pixelRatio\n'
-          'Text scale factor: $textScaleFactor\n'
-          'Platform brightness: $platformBrightness\n'
-          'Padding: $padding\n'
-          'View insets: $viewInsets\n'
-          'System gesture insets: $systemGestureInsets\n'
-          'Always use 24-hour format: $alwaysUse24HourFormat\n'
-          'Accessible navigation: $accessibleNavigation\n'
-          'Invert colors: $invertColors\n'
-          'High contrast: $highContrast\n'),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 50),
+      child: SizedBox(
+        child: Text('=====================\n'
+            'Служебная информация\n'
+            '------------------------------------------\n'
+            'Real screen size, RSS: $realScreenSize\n'
+            'Device pixel ratio, DPR: $pixelRatio\n'
+            'Virtual screen size, VSS: $virtualScreenSize\n'
+            'CurrentDPI: $currentDPI\n'
+            'Text scale factor: $textScaleFactor\n'
+            'Platform brightness: $platformBrightness\n'
+            'Padding: $padding\n'
+            'View insets: $viewInsets\n'
+            'System gesture insets: $systemGestureInsets\n'
+            'Always use 24-hour format: $alwaysUse24HourFormat\n'
+            'Accessible navigation: $accessibleNavigation\n'
+            'Invert colors: $invertColors\n'
+            'High contrast: $highContrast\n'),
+      ),
     );
   }
 }

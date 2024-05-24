@@ -7,8 +7,6 @@ final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
   seedColor: const Color.fromARGB(255, 135, 12, 100),
   background: const Color.fromARGB(255, 10, 0, 10),
-  // background: const Color.fromARGB(20, 135, 12, 100),
-  // background: const Color.fromARGB(255, 56, 49, 66),
 );
 
 final theme = ThemeData.dark().copyWith(
@@ -17,7 +15,8 @@ final theme = ThemeData.dark().copyWith(
   visualDensity: VisualDensity.adaptivePlatformDensity,
   //
   appBarTheme: AppBarTheme(
-    backgroundColor: colorScheme.onPrimary,
+    // backgroundColor: colorScheme.onPrimary,
+    backgroundColor: colorScheme.background,
     foregroundColor: colorScheme.primary,
   ),
   //
@@ -40,17 +39,22 @@ final theme = ThemeData.dark().copyWith(
       )),
   //
   textTheme: ThemeData().textTheme.copyWith(
+        // текст экрана, Roboto, 14/20 pt, w400, tracking 0.25 pt
         bodyMedium: TextStyle(
           color: colorScheme.tertiary.withOpacity(.8),
-        ), // обычный текст на экране
+        ),
+        //
         displayLarge: TextStyle(
           fontFamily: 'AlumniSans',
           fontWeight: FontWeight.w900,
           color: colorScheme.primaryContainer.withOpacity(.9),
         ),
-        headlineSmall: const TextStyle(
+        //
+        headlineSmall: TextStyle(
           fontSize: 16,
+          color: colorScheme.primary,
         ),
+        //
         titleSmall: TextStyle(
           fontFamily: 'AlumniSans',
           color: colorScheme.tertiary,
@@ -68,6 +72,7 @@ final theme = ThemeData.dark().copyWith(
         ),
       ),
   badgeTheme: BadgeThemeData(textColor: colorScheme.primary),
+  iconTheme: IconThemeData(color: colorScheme.primary),
   snackBarTheme: SnackBarThemeData(
       backgroundColor: Colors.transparent,
       contentTextStyle: TextStyle(

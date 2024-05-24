@@ -22,32 +22,38 @@ class SplashScreen extends StatelessWidget {
         nextScreen: const PlacesScreen(),
         splashScreenBody: Center(
             child: Stack(
-          alignment: Alignment.center,
+          alignment: Alignment.bottomCenter,
           children: [
-            Positioned(
-              child: Text(
-                '100',
-                style: tTheme.displayLarge!.copyWith(
-                  fontSize: 256,
-                ),
-              )
-                  .animate()
-                  .scale(
-                    duration: 3.seconds,
-                    curve: Curves.easeInOutBack,
-                  )
-                  .fadeOut(
-                    delay: 2.seconds,
-                    duration: 2.seconds,
-                  ),
-            ),
-            Positioned(
-                child: Text(
-              'МЕСТ',
-              style: tTheme.titleMedium!.copyWith(
-                fontSize: 135,
+            Text(
+              '100',
+              style: tTheme.displayLarge!.copyWith(
+                fontSize: 260,
               ),
-            ))
+            )
+                .animate()
+                .fadeIn(
+                  duration: 1.seconds,
+                )
+                .slideX(
+                  duration: 1.seconds,
+                  curve: Curves.easeOutBack,
+                )
+                .slideX(
+                  delay: 1200.ms,
+                  begin: 0,
+                  end: 10,
+                  duration: 1.seconds,
+                  curve: Curves.easeIn,
+                ),
+            Positioned(
+                right: 6,
+                bottom: 56,
+                child: Text(
+                  'МЕСТ',
+                  style: tTheme.titleMedium!.copyWith(
+                    fontSize: 130,
+                  ),
+                ))
           ],
         )));
   }

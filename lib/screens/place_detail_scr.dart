@@ -28,10 +28,10 @@ class PlaceDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    print('=== МСБ ЭИМ!!! ===');
-
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
+    final deviceHeight = MediaQuery.sizeOf(context).height;
+    final toolbarH = deviceHeight * .09;
     final String currentDate = place.date;
     final PlaceLocation currentLocation = place.location;
 
@@ -200,17 +200,19 @@ ${place.location.longitude.toString()}
       icon: Icon(
         Icons.menu,
         size: 30,
-        color: cScheme.primary,
+        color: cScheme.primaryContainer,
       ),
       itemBuilder: (BuildContext ctx) => getMenuItems,
     );
+
+    print('=== МСБ ЭИМ!!! ===');
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: TitleView(currentPlace: place),
-        toolbarHeight: 70,
+        toolbarHeight: toolbarH,
         leading: BackButton(
           onPressed: () {
             ref.read(isEditTitleProvider.notifier).state = false;

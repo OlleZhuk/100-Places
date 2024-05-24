@@ -10,9 +10,8 @@ import '/models/place.dart';
 import '/providers/user_places.dart';
 import '/widgets/custom_fab.dart';
 import '/widgets/alert_dialogs.dart';
-import '../widgets/responsiveness.dart';
-import '/widgets/gradient_appbar.dart';
 import '/widgets/route_transition.dart';
+import '/widgets/shader_mask_decoration.dart';
 import 'add_place_scr.dart';
 import 'info_scr.dart';
 import 'place_detail_scr.dart';
@@ -65,14 +64,6 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         });
       });
 
-  //* Резиновая панель приложений
-  double get scalableToolbarHeight {
-    final deviceHeight = MediaQuery.sizeOf(context).height;
-    final toolbarH = deviceHeight * .09;
-
-    return toolbarH;
-  }
-
   @override
   void initState() {
     _placesFuture = ref.read(userPlacesProvider.notifier).loadPlaces();
@@ -82,6 +73,8 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   @override
   Widget build(context) {
     List<Place> userPlaces = ref.watch(userPlacesProvider);
+    final deviceHeight = MediaQuery.sizeOf(context).height;
+    final toolbarH = deviceHeight * .09;
     final tTheme = Theme.of(context).textTheme;
     final q = userPlaces.length;
     const double horPadds = 30;
@@ -165,9 +158,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 
     return Scaffold(
         appBar: AppBar(
-          // toolbarHeight: scalableToolbar.height,
-          toolbarHeight: scalableToolbarHeight,
-          flexibleSpace: const GradientAppBar(),
+          toolbarHeight: toolbarH,
           leading: popUpMainMenu,
           title: titleWidget,
           actions: [popUpSortMenu],
@@ -302,33 +293,5 @@ class MainContent extends ConsumerWidget {
                               height: imageWidth,
                               width: imageWidth,
                             )))))));
-  }
-}
-
-//* _ShaderMaskDecoration_ -------------------------
-class ShaderMaskDecoration extends StatelessWidget {
-  const ShaderMaskDecoration({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final cScheme = Theme.of(context).colorScheme;
-
-    return ShaderMask(
-      shaderCallback: (Rect rect) => LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          cScheme.background,
-          Colors.transparent,
-          Colors.transparent,
-          cScheme.background,
-        ],
-        stops: const [0.0, 0.03, 0.85, 1.0], //^ 5% цвет, 79% transparent, 15% цвет
-      ).createShader(rect),
-      blendMode: BlendMode.dstOut,
-      child: child,
-    );
   }
 }

@@ -20,11 +20,9 @@ class GetMapAddress extends StateNotifier<String> {
     double lng,
   ) async {
     String address = '';
-    const error = 'error';
-    const err403 = '''⛔ОШИБКА!
-Исчерпан ежедневный лимит Яндекса на выдачу адресов. Пожалуйста, введите адрес вручную или повторите попытку завтра.''';
-    const noInternet = '''⛔Адрес не получен!
-Проверьте соединение с интернетом!''';
+    const error = '⛔НЕПРЕДВИДЕННАЯ ОШИБКА!';
+    const err403 = '⛔АДРЕС НЕ ПОЛУЧЕН!\n' 'Исчерпан ежедневный лимит Яндекса на выдачу адресов. Пожалуйста, введите адрес вручную или повторите попытку завтра.';
+    const noInternet = '⛔АДРЕС НЕ ПОЛУЧЕН!\n' 'Проверьте соединение с интернетом!';
 
     final YandexGeocoder geo = YandexGeocoder(
       // apiKey: '0fc3094b-3486-45eb-a27d-8c7b62e062b3', // #4

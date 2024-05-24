@@ -11,16 +11,17 @@ import '/providers/any_states.dart';
 import '/providers/any_locations.dart';
 import '/providers/geocoder.dart';
 import '/widgets/custom_fab.dart';
-import '/widgets/gradient_appbar.dart';
 
 class MapScreen extends ConsumerWidget {
   const MapScreen({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    print('=== МСБ ЭК!!! ===');
-
     Point? pickedLocation;
+    final deviceHeight = MediaQuery.sizeOf(context).height;
+    final toolbarH = deviceHeight * .09;
+
+    print('=== МСБ ЭК!!! ===');
 
     return Scaffold(
       appBar: AppBar(
@@ -28,8 +29,7 @@ class MapScreen extends ConsumerWidget {
             'Выбрать Место',
             style: TextStyle(fontSize: 30),
           ),
-          toolbarHeight: 70,
-          flexibleSpace: const GradientAppBar(),
+          toolbarHeight: toolbarH,
           leading: BackButton(
             onPressed: () {
               ref.invalidate(addressProvider);
@@ -69,14 +69,14 @@ class OnMapAddressView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    print('=== МСБ OnMapAddressView!!! ===');
-
     Point? gettingLoc;
     final cScheme = Theme.of(context).colorScheme;
-    final bool isConfirmedLocation = ref.watch(isConfirmedLocationProvider); //> флаг выбора локации на карте
+    final bool isConfirmedLocation = ref.watch(isConfirmedLocationProvider);
     final String address = ref.watch(addressProvider);
     final String startPointAddress = ref.watch(startPointProvider).address;
     final String currentDate = ref.watch(dateProvider);
+
+    print('=== МСБ OnMapAddressView!!! ===');
 
     return Card(
         color: Colors.transparent,
@@ -94,14 +94,12 @@ class OnMapAddressView extends ConsumerWidget {
                     child: Text(
 
                         /// если подтверждаем местоположение, то выводится адрес с геокодера,
-                        /// если нет, то остается текущий (стартовый) адрес Места
+                        /// если нет, то остается текущий (стартовый) адрес Места.
+                        /// При этом, если адрес пуст, видим сообщение.
                         isConfirmedLocation
                             ? address.isNotEmpty
                                 ? address
-                                : '''
-Сегодня Яндекс не может предоставить адрес.
-Попробуйте завтра или воспользуйтесь ручным вводом.
-'''
+                                : 'Сегодня Яндекс не может предоставить адрес.\n' 'Воспользуйтесь ручным вводом или попробуйте завтра.'
                             : startPointAddress,
                         textAlign: TextAlign.start,
                         softWrap: true,
