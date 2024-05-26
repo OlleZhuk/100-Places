@@ -1,6 +1,7 @@
 /// Экран "О приложении", ЭОП
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gap/gap.dart';
@@ -28,34 +29,42 @@ class AppInfo extends StatelessWidget {
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
 
-    Widget topicText(String data) => Text(
-          data,
-          textScaleFactor: 1,
-        );
+    // Widget topicText(String data) => Text(
+    //       data,
+    //       textScaleFactor: 1,
+    //     );
 
     final List<Widget> topics = [
-      topicText('Коллекция "100 Мест", версия 1.1.1'),
-      topicText('Это приложение для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
-      topicText('Временное хранение означает, что после очистки коллекции или после удаления приложения восстановить коллекцию не получится.'),
-      topicText('Тем не менее, у вас есть функция "Поделиться", чтобы не потерять самые важные Места.\n' 'Яндекс вообще рекомендует хранить полученный адрес не более 30 дней.'),
-      Wrap(
-        children: [
-          topicText('В приложении используется карта Яндекса в соответствии с принятыми '),
-          InkWell(
-            child: Text(
-              'условиями.',
-              textScaleFactor: 1,
+      const Text('Коллекция "100 Мест", версия 1.1.1'),
+      const Text('Это приложение для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
+      const Text('Временное хранение означает, что после очистки коллекции или после удаления приложения восстановить коллекцию не получится.'),
+      const Text('Однако при этом под рукой всегда остаётся функция "Поделиться", чтобы не потерять самые важные Места.'),
+      RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+                text: 'Сервис Яндекс.Карты, который используется в соответствии с принятыми ',
+                style: TextStyle(
+                  color: cScheme.tertiary.withOpacity(.8),
+                )),
+            TextSpan(
+              text: 'условиями, ',
               style: TextStyle(
                 color: cScheme.primaryContainer,
                 decoration: TextDecoration.underline,
               ),
+              recognizer: TapGestureRecognizer()..onTap = () => launchURL(),
             ),
-            onTap: () => launchURL(),
-          ),
-        ],
+            TextSpan(
+                text: 'вообще рекомендует хранить полученный адрес не более 30 дней.',
+                style: TextStyle(
+                  color: cScheme.tertiary.withOpacity(.8),
+                )),
+          ],
+        ),
       ),
-      topicText('Если Яндекс не выдаёт вам адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте местоположение вручную.'),
-      topicText('Разработчик разделяет удивление и негодование пользователя, получившего от Яндекс Карт принадлежность новых федеральных регионов по-прежнему Украине.'),
+      const Text('Если сервис Яндекс.Карт не выдаёт вам сегодня адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте адрес местоположения вручную.'),
+      const Text('Разработчик разделяет удивление и негодование пользователя, получившего от Яндекс.Карт адрес с принадлежностью новых федеральных регионов по-прежнему Украине.'),
     ];
 
     return Scaffold(

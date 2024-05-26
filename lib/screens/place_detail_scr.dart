@@ -30,8 +30,7 @@ class PlaceDetailScreen extends ConsumerWidget {
   Widget build(context, ref) {
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
-    final deviceHeight = MediaQuery.sizeOf(context).height;
-    final toolbarH = deviceHeight * .09;
+    final toolbarH = MediaQuery.sizeOf(context).height * .1;
     final String currentDate = place.date;
     final PlaceLocation currentLocation = place.location;
 

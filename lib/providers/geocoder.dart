@@ -7,12 +7,12 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yandex_geocoder/yandex_geocoder.dart';
 
-final addressProvider = StateNotifierProvider<GetMapAddress, String>(
-  (ref) => GetMapAddress(),
+final addressProvider = StateNotifierProvider<GetAddress, String>(
+  (ref) => GetAddress(),
 );
 
-class GetMapAddress extends StateNotifier<String> {
-  GetMapAddress() : super('');
+class GetAddress extends StateNotifier<String> {
+  GetAddress() : super('');
 
 //* Метод получения локации
   Future<void> getAddress(

@@ -28,12 +28,11 @@ class AddPlaceScreen extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     PlaceLocation? selectedLocation;
     File? selectedImage;
-    final deviceHeight = MediaQuery.sizeOf(context).height;
-    final toolbarH = deviceHeight * .09;
+    final toolbarH = MediaQuery.sizeOf(context).height * .1;
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
     final titleController = TextEditingController();
-    final labelOpacity = cScheme.tertiary.withOpacity(.5);
+    final labelOpacity = cScheme.tertiary.withOpacity(.7);
     const double iconSize = 35;
 
     //* Метод сохранения Места (кн. 'Сохранить')
@@ -82,6 +81,7 @@ class AddPlaceScreen extends ConsumerWidget {
               ref.read(sourseLocationProvider.notifier).state = 'geo';
               ref.read(isCreatingLocationProvider.notifier).state = false;
               ref.invalidate(addressProvider);
+              ref.invalidate(locationProvider);
               Navigator.of(context).pop();
             },
           )),
@@ -94,6 +94,14 @@ class AddPlaceScreen extends ConsumerWidget {
               Image.asset('assets/landscape.webp'),
 
               /// Название
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '1. Добавьте название',
+                  style: TextStyle(color: cScheme.primaryContainer),
+                ),
+              ),
+              const Gap(6),
               TextField(
                   controller: titleController,
                   maxLength: 30,
@@ -120,6 +128,14 @@ class AddPlaceScreen extends ConsumerWidget {
                       )))),
 
               /// Изображение
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '2. Добавьте снимок или изображение из галереи',
+                  style: TextStyle(color: cScheme.primaryContainer),
+                ),
+              ),
+              const Gap(6),
               ImageInput(
                 onPickImage: (File image) {
                   selectedImage = image;
@@ -132,6 +148,14 @@ class AddPlaceScreen extends ConsumerWidget {
               const Gap(18),
 
               /// Местоположение
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '3. Выберите местоположение - текущее или на карте',
+                  style: TextStyle(color: cScheme.primaryContainer),
+                ),
+              ),
+              const Gap(6),
               LocationInput(
                 onSelectLocation: (PlaceLocation userLocation) {
                   selectedLocation = userLocation;
@@ -177,14 +201,10 @@ class ImageInput extends StatefulWidget {
 
 class _ImageInputState extends State<ImageInput> {
   File? _selectedImage;
-  final imagePicker = ImagePicker();
   bool isCamera = true;
 
-  ColorScheme get cScheme => Theme.of(context).colorScheme;
-  TextTheme get tTheme => Theme.of(context).textTheme;
-  double get deviceWidth => MediaQuery.of(context).size.width;
-
   Future<void> _takePicture() async {
+    final imagePicker = ImagePicker();
     final pickedImage = await imagePicker.pickImage(
       source: isCamera ? ImageSource.camera : ImageSource.gallery,
     );
@@ -199,11 +219,50 @@ class _ImageInputState extends State<ImageInput> {
   @override
   Widget build(BuildContext context) {
     const double gap = 14;
+    final cScheme = Theme.of(context).colorScheme;
+    final tTheme = Theme.of(context).textTheme;
+    final deviceWidth = MediaQuery.sizeOf(context).width;
 
     print('=== МСБ ImageInput!!! ===');
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        /// Выбор источника
+        Column(
+          children: [
+            InkWell(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Сделать\n' 'снимок'),
+                  const Gap(gap),
+                  Icon(Icons.camera, size: widget.iconSz),
+                ],
+              ),
+              onTap: () {
+                isCamera = true;
+                _takePicture();
+              },
+            ),
+            const Gap(gap * 2.5),
+            InkWell(
+              child: Row(
+                children: [
+                  const Text('Взять из\n' 'галереи'),
+                  const Gap(gap),
+                  Icon(Icons.wallpaper, size: widget.iconSz),
+                ],
+              ),
+              onTap: () {
+                isCamera = false;
+                _takePicture();
+              },
+            ),
+          ],
+        ),
+        const Gap(gap * 2),
+
         /// Место для изобпажения
         Container(
           width: deviceWidth * .5,
@@ -236,45 +295,6 @@ class _ImageInputState extends State<ImageInput> {
                   ))
               : null,
         ),
-        const Gap(gap),
-
-        /// Выбор источника
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.camera, size: widget.iconSz),
-                    const Gap(gap),
-                    const Text('Сделать\n' 'снимок'),
-                  ],
-                ),
-                onTap: () {
-                  isCamera = true;
-                  _takePicture();
-                },
-              ),
-              const Gap(gap * 2.5),
-              InkWell(
-                child: Row(
-                  children: [
-                    Icon(Icons.wallpaper, size: widget.iconSz),
-                    const Gap(gap),
-                    const Text('Взять из\n' 'галереи'),
-                  ],
-                ),
-                onTap: () {
-                  isCamera = false;
-                  _takePicture();
-                },
-              ),
-            ],
-          ),
-        )
       ],
     );
   }
@@ -298,15 +318,16 @@ class LocationInput extends ConsumerStatefulWidget {
 }
 
 class ConsumerLocationInputState extends ConsumerState<LocationInput> {
+  // late Future<void> _userAddressFuture;
+  // Future<void> get _userAddressFuture => getUserLocation();
   PlaceLocation? _pickedLocation;
-  bool get isCreatingLocation => ref.watch(isCreatingLocationProvider);
   TextTheme get tTheme => Theme.of(context).textTheme;
   ColorScheme get cScheme => Theme.of(context).colorScheme;
 
   //* Метод компоновки и сохранения полученной локации
   Future<void> _getLocation(double latitude, double longitude) async {
     /// 1. Получение адреса (геокодер или ручной ввод)
-    String addressSource = ref.watch(sourseLocationProvider);
+    final addressSource = ref.watch(sourseLocationProvider);
     String locationAddress;
 
     switch (addressSource) {
@@ -329,8 +350,6 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
         address: locationAddress,
       );
     });
-    // print('=== addressSource: $addressSource');
-    // print('=== locationAddress: $locationAddress');
 
     if (_pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
 
@@ -371,14 +390,11 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
     if (lat == null || lng == null) {
       return;
     }
-
     final point = Point(latitude: lat, longitude: lng);
     ref.read(locationProvider.notifier).state = point;
-
     await ref.read(addressProvider.notifier).getAddress(lat, lng);
-    _getLocation(lat, lng);
-
     ref.read(isCreatingLocationProvider.notifier).state = true;
+    _getLocation(lat, lng);
   }
 
   //* Метод выбора локации на карте
@@ -458,9 +474,12 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
     );
   }
 
+  // Point get loc => ref.watch(locationProvider);
+
   @override
   Widget build(BuildContext context) {
     const double gap = 34;
+    final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
 
     print('=== МСБ LocationInput! ===');
 
@@ -469,47 +488,42 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
         //
         /// Местоположение
         Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: cScheme.primary.withOpacity(.2),
-              width: 1.6,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: cScheme.primary.withOpacity(.2),
+                width: 1.6,
+              ),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10),
+              ),
             ),
-            borderRadius: const BorderRadius.all(
-              Radius.circular(10),
-            ),
-          ),
-          child: !isCreatingLocation
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 22,
-                  ),
-                  child: Text(
-                    'Местоположение:',
-                    style: tTheme.titleSmall!.copyWith(
-                      color: widget.labelOpc,
+            child: !isCreatingLocation
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 22,
                     ),
-                  ),
-                )
-              : _pickedLocation == null
-                  ? const Center(
-                      child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: CircularProgressIndicator(),
-                    ))
-                  : Expanded(
-                      child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 12,
+                    child: Text(
+                      'Местоположение:',
+                      style: tTheme.titleSmall!.copyWith(
+                        color: widget.labelOpc,
                       ),
-                      child: Text(
-                        _pickedLocation!.address,
-                        // style: tTheme.titleSmall,
-                      ),
-                    )),
-        ),
+                    ),
+                  )
+                : _pickedLocation == null
+                    ? const Center(
+                        child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: CircularProgressIndicator(),
+                      ))
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                        child: Text(_pickedLocation!.address),
+                      )),
         const Gap(gap / 2),
 
         /// Кнопки выбора местоположения

@@ -18,8 +18,7 @@ class MapScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     Point? pickedLocation;
-    final deviceHeight = MediaQuery.sizeOf(context).height;
-    final toolbarH = deviceHeight * .09;
+    final toolbarH = MediaQuery.sizeOf(context).height * .1;
 
     print('=== МСБ ЭК!!! ===');
 
@@ -99,7 +98,7 @@ class OnMapAddressView extends ConsumerWidget {
                         isConfirmedLocation
                             ? address.isNotEmpty
                                 ? address
-                                : 'Сегодня Яндекс не может предоставить адрес.\n' 'Воспользуйтесь ручным вводом или попробуйте завтра.'
+                                : '⛔ОШИБКА!\n' 'Похоже, что сегодня Яндекс не может предоставить адрес.\n' 'Воспользуйтесь ручным вводом или попробуйте завтра.'
                             : startPointAddress,
                         textAlign: TextAlign.start,
                         softWrap: true,

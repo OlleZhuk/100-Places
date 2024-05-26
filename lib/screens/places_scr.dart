@@ -73,8 +73,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   @override
   Widget build(context) {
     List<Place> userPlaces = ref.watch(userPlacesProvider);
-    final deviceHeight = MediaQuery.sizeOf(context).height;
-    final toolbarH = deviceHeight * .09;
+    final toolbarH = MediaQuery.sizeOf(context).height * .1;
     final tTheme = Theme.of(context).textTheme;
     final q = userPlaces.length;
     const double horPadds = 30;
