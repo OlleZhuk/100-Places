@@ -9,13 +9,13 @@ import 'package:gap/gap.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../providers/any_locations.dart';
-import '../providers/any_states.dart';
-import '/providers/geocoder.dart';
-import '../widgets/alert_dialogs.dart';
-import '/widgets/route_transition.dart';
-import '../providers/user_places.dart';
 import '/models/place.dart';
+import '/providers/any_locations.dart';
+import '/providers/any_states.dart';
+import '/providers/geocoder.dart';
+import '/providers/user_places.dart';
+import '/widgets/alert_dialogs.dart';
+import '/widgets/route_transition.dart';
 import 'map_scr.dart';
 
 class PlaceDetailScreen extends ConsumerWidget {
@@ -31,8 +31,8 @@ class PlaceDetailScreen extends ConsumerWidget {
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
     final toolbarH = MediaQuery.sizeOf(context).height * .1;
-    final String currentDate = place.date;
-    final PlaceLocation currentLocation = place.location;
+    final currentDate = place.date;
+    final currentLocation = place.location;
 
     //* Метод редакции названия
     Future<void> editTitle() async {
@@ -44,14 +44,16 @@ class PlaceDetailScreen extends ConsumerWidget {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
-          backgroundColor: cScheme.background,
+          backgroundColor: cScheme.background.withOpacity(.4),
           content: Padding(
               padding: const EdgeInsets.only(top: 5),
               //
               child: TextField(
                   controller: titleController,
                   autofocus: true,
-                  maxLength: 30,
+                  maxLength: 35,
+                  keyboardType: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
                   style: tTheme.headlineSmall!.copyWith(
                     color: cScheme.primary,
                   ),
@@ -61,11 +63,7 @@ class PlaceDetailScreen extends ConsumerWidget {
                       hintStyle: TextStyle(
                         color: cScheme.onSecondaryContainer.withOpacity(.3),
                       ),
-                      suffixIcon: IconButton(
-                          onPressed: () {
-                            titleController.clear();
-                          },
-                          icon: const Icon(Icons.clear)),
+                      suffixIcon: IconButton(onPressed: () => titleController.clear(), icon: const Icon(Icons.clear)),
                       counterStyle: TextStyle(color: cScheme.primary),
                       enabledBorder: OutlineInputBorder(
                           borderRadius: const BorderRadius.all(
@@ -128,16 +126,22 @@ class PlaceDetailScreen extends ConsumerWidget {
 
     //* Метод "Поделиться"
     Future<void> shareContent() async {
+      final lat = place.location.latitude >= 0 ? '| СШ' : '| ЮШ';
+      final lng = place.location.longitude >= 0 ? '| ВД' : '| ЗД';
       await Share.shareXFiles(
         [XFile(place.image.path)],
-        text: '''
-НАЗВАНИЕ: ${place.title}
-АДРЕС: ${place.location.address.toString()}
-КООРДИНАТЫ:
-${place.location.latitude.toString()} 
-${place.location.longitude.toString()}
-ДАТА: ${place.date.replaceRange(16, null, '')}
-      ''',
+        text: 'НАЗВАНИЕ:\n'
+            '${place.title}\n'
+            '\n'
+            'АДРЕС:\n'
+            '${place.location.address.toString()}\n'
+            '\n'
+            'КООРДИНАТЫ:\n'
+            '${place.location.latitude.toString()} $lat\n'
+            '${place.location.longitude.toString()} $lng\n'
+            '\n'
+            'ДАТА:\n'
+            '${place.date.replaceRange(16, null, '')}\n',
       );
     }
 

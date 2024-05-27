@@ -54,7 +54,7 @@ class MapScreen extends ConsumerWidget {
                 );
           }),
 
-      //^ Видимый адрес
+      /// Отображение адреса
       bottomNavigationBar: const OnMapAddressView(),
     );
   }
@@ -62,7 +62,7 @@ class MapScreen extends ConsumerWidget {
 
 /// ВИДЖЕТЫ
 ///
-//* Виджет отображения адреса
+/// Виджет отображения адреса
 class OnMapAddressView extends ConsumerWidget {
   const OnMapAddressView({super.key});
 
@@ -98,6 +98,7 @@ class OnMapAddressView extends ConsumerWidget {
                         isConfirmedLocation
                             ? address.isNotEmpty
                                 ? address
+                                //< сюда нужен индикатор!
                                 : '⛔ОШИБКА!\n' 'Похоже, что сегодня Яндекс не может предоставить адрес.\n' 'Воспользуйтесь ручным вводом или попробуйте завтра.'
                             : startPointAddress,
                         textAlign: TextAlign.start,

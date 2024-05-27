@@ -13,9 +13,10 @@ final theme = ThemeData.dark().copyWith(
   colorScheme: colorScheme,
   scaffoldBackgroundColor: colorScheme.background,
   visualDensity: VisualDensity.adaptivePlatformDensity,
+  badgeTheme: BadgeThemeData(textColor: colorScheme.primary),
+  iconTheme: IconThemeData(color: colorScheme.primary),
   //
   appBarTheme: AppBarTheme(
-    // backgroundColor: colorScheme.onPrimary,
     backgroundColor: colorScheme.background,
     foregroundColor: colorScheme.primary,
   ),
@@ -24,30 +25,40 @@ final theme = ThemeData.dark().copyWith(
     interactive: true,
     minThumbLength: 70,
     thickness: const MaterialStatePropertyAll(8),
-    thumbColor: MaterialStatePropertyAll(
-      colorScheme.primaryContainer,
-    ),
+    thumbColor: MaterialStatePropertyAll(colorScheme.primaryContainer),
     radius: const Radius.circular(4),
   ),
   //
   popupMenuTheme: PopupMenuThemeData(
-      position: PopupMenuPosition.under,
-      color: colorScheme.onPrimary,
-      elevation: 6,
-      textStyle: TextStyle(
-        color: colorScheme.primary,
-      )),
+    position: PopupMenuPosition.under,
+    color: colorScheme.onPrimary,
+    elevation: 6,
+    textStyle: TextStyle(color: colorScheme.primary),
+  ),
   //
   textTheme: ThemeData().textTheme.copyWith(
-        // текст экрана, Roboto, 14/20 pt, w400, tracking 0.25 pt
+        //^ labelText текстового поля
+        bodySmall: TextStyle(
+          fontFamily: 'AlumniSans',
+          fontSize: 18,
+          color: colorScheme.primary.withOpacity(.6),
+        ),
+        //^ текст экрана
         bodyMedium: TextStyle(
           color: colorScheme.tertiary.withOpacity(.8),
         ),
         //
         displayLarge: TextStyle(
+          //^ слово "100"
           fontFamily: 'AlumniSans',
           fontWeight: FontWeight.w900,
           color: colorScheme.primaryContainer.withOpacity(.9),
+        ),
+        displayMedium: TextStyle(
+          //^ слово "МЕСТ"
+          fontFamily: 'AlumniSans',
+          fontWeight: FontWeight.w900,
+          color: colorScheme.background,
         ),
         //
         headlineSmall: TextStyle(
@@ -56,28 +67,38 @@ final theme = ThemeData.dark().copyWith(
         ),
         //
         titleSmall: TextStyle(
+          //^ названия на картинках
           fontFamily: 'AlumniSans',
           color: colorScheme.tertiary,
-          fontSize: 16, //^ названия на картинках
+          fontSize: 16,
         ),
         titleMedium: TextStyle(
-          fontFamily: 'AlumniSans',
-          color: colorScheme.background,
-          fontWeight: FontWeight.w900, //^ "мест"
+          //^_TextField_
+          color: colorScheme.primary,
         ),
         titleLarge: TextStyle(
+          //^ заголовок в панели приложений
           fontFamily: 'AlumniSans',
           color: colorScheme.primary,
           fontWeight: FontWeight.w200,
         ),
       ),
-  badgeTheme: BadgeThemeData(textColor: colorScheme.primary),
-  iconTheme: IconThemeData(color: colorScheme.primary),
+  //
   snackBarTheme: SnackBarThemeData(
-      backgroundColor: Colors.transparent,
-      contentTextStyle: TextStyle(
-        color: colorScheme.tertiary,
-      )),
+    backgroundColor: Colors.transparent,
+    contentTextStyle: TextStyle(color: colorScheme.tertiary),
+  ),
+  //
+  filledButtonTheme: FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+        elevation: 3,
+        foregroundColor: colorScheme.primary,
+        backgroundColor: colorScheme.primaryContainer.withOpacity(.8),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        )),
+  ),
 );
 void main() => runApp(const ProviderScope(child: MyApp()));
 

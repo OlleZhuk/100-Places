@@ -15,7 +15,6 @@ class AppInfo extends StatelessWidget {
   const AppInfo({super.key});
 
   launchURL() async {
-    //<   индикатор бы загрузки, а то просто висим и ждем...
     Uri url = Uri.parse('https://yandex.ru/legal/maps_termsofuse/');
     if (await launchUrl(url)) {
       await launchUrl(url);
@@ -41,12 +40,14 @@ class AppInfo extends StatelessWidget {
       const Text('Однако при этом под рукой всегда остаётся функция "Поделиться", чтобы не потерять самые важные Места.'),
       RichText(
         text: TextSpan(
+          style: TextStyle(
+            fontSize: 16,
+            color: cScheme.tertiary.withOpacity(.8),
+          ),
           children: [
-            TextSpan(
-                text: 'Сервис Яндекс.Карты, который используется в соответствии с принятыми ',
-                style: TextStyle(
-                  color: cScheme.tertiary.withOpacity(.8),
-                )),
+            const TextSpan(
+              text: 'Сервис Яндекс.Карты, который используется в соответствии с принятыми ',
+            ),
             TextSpan(
               text: 'условиями, ',
               style: TextStyle(
@@ -55,15 +56,13 @@ class AppInfo extends StatelessWidget {
               ),
               recognizer: TapGestureRecognizer()..onTap = () => launchURL(),
             ),
-            TextSpan(
-                text: 'вообще рекомендует хранить полученный адрес не более 30 дней.',
-                style: TextStyle(
-                  color: cScheme.tertiary.withOpacity(.8),
-                )),
+            const TextSpan(
+              text: 'вообще рекомендует хранить полученный адрес не более 30 дней.',
+            ),
           ],
         ),
       ),
-      const Text('Если сервис Яндекс.Карт не выдаёт вам сегодня адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте адрес местоположения вручную.'),
+      const Text('Если сегодня сервис Яндекс.Карты не выдаёт адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте адрес местоположения вручную.'),
       const Text('Разработчик разделяет удивление и негодование пользователя, получившего от Яндекс.Карт адрес с принадлежностью новых федеральных регионов по-прежнему Украине.'),
     ];
 
@@ -71,90 +70,76 @@ class AppInfo extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 180,
-            backgroundColor: cScheme.background,
-            floating: true,
-            flexibleSpace: FlexibleSpaceBar(
-              expandedTitleScale: 1.8,
-              background: Container(color: cScheme.background),
-              title: ShaderMaskDecoration(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(),
-                    Positioned(
-                      bottom: -30,
-                      right: 0,
-                      child: Text(
-                        '100',
-                        style: tTheme.displayLarge!.copyWith(
-                          fontSize: 110,
-                        ),
-                      ).animate().fadeIn(duration: 1.seconds).scale(
-                            duration: 2.seconds,
-                            curve: Curves.easeOutBack,
+              expandedHeight: 200,
+              backgroundColor: cScheme.background,
+              floating: true,
+              flexibleSpace: FlexibleSpaceBar(
+                  expandedTitleScale: 1.8,
+                  background: Container(color: cScheme.background),
+                  title: ShaderMaskDecoration(
+                      child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Container(), // незыблемый
+                      Positioned(
+                        bottom: -30,
+                        right: 0,
+                        child: Text(
+                          '100',
+                          style: tTheme.displayLarge!.copyWith(
+                            fontSize: 110,
                           ),
-                    ),
-                    Positioned(
-                      bottom: -15,
-                      right: 0,
-                      child: Text(
-                        'МЕСТ',
-                        // textAlign: TextAlign.right,
-                        style: tTheme.titleMedium!.copyWith(
-                          fontSize: 58,
-                        ),
-                      ).animate().fadeIn(duration: 2.seconds),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: Gap(10),
-          ),
+                        ).animate().fadeIn(duration: 1.seconds).scale(
+                              duration: 2.seconds,
+                              curve: Curves.easeOutBack,
+                            ),
+                      ),
+                      Positioned(
+                        bottom: -15,
+                        right: 0,
+                        child: Text(
+                          'МЕСТ',
+                          style: tTheme.displayMedium!.copyWith(
+                            fontSize: 58,
+                          ),
+                        ).animate().fadeIn(duration: 2.seconds),
+                      ),
+                    ],
+                  )))),
+          const SliverToBoxAdapter(child: Gap(10)),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 40,
-              ),
-              child: SizedBox(
-                child: SuperBulletList(
-                  isOrdered: false,
-                  style: BulletStyle.discFill,
-                  iconColor: cScheme.tertiary.withOpacity(.7),
-                  iconSize: 5,
-                  // customBullet: const Text('🔥'),
-                  gap: 10,
-                  items: topics,
-                )
-                    .animate(delay: 1.seconds)
-                    .fadeIn(
-                      duration: 900.ms,
-                      delay: 300.ms,
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                  ),
+                  child: SizedBox(
+                    child: SuperBulletList(
+                      isOrdered: false,
+                      style: BulletStyle.discFill,
+                      iconColor: cScheme.tertiary.withOpacity(.7),
+                      iconSize: 5,
+                      // customBullet: const Text('🔥'),
+                      gap: 10,
+                      items: topics,
                     )
-                    .shimmer(
-                      duration: 1.seconds,
-                      blendMode: BlendMode.srcOver,
-                      color: Colors.white12,
-                    )
-                    .move(
-                      begin: const Offset(30, 0),
-                      curve: Curves.easeOutQuad,
-                    ),
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: Gap(10),
-          ),
-          const SliverToBoxAdapter(
-            child: MediaQueryImplementation(),
-          ),
-          const SliverToBoxAdapter(
-            child: Gap(100),
-          ),
+                        .animate(delay: 1.seconds)
+                        .fadeIn(
+                          duration: 900.ms,
+                          delay: 300.ms,
+                        )
+                        .shimmer(
+                          duration: 1.seconds,
+                          blendMode: BlendMode.srcOver,
+                          color: Colors.white12,
+                        )
+                        .move(
+                          begin: const Offset(30, 0),
+                          curve: Curves.easeOutQuad,
+                        ),
+                  ))),
+          const SliverToBoxAdapter(child: Gap(10)),
+          const SliverToBoxAdapter(child: MediaQueryImplementation()),
+          const SliverToBoxAdapter(child: Gap(100)),
         ],
       ),
     );

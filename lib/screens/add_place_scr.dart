@@ -94,25 +94,14 @@ class AddPlaceScreen extends ConsumerWidget {
               Image.asset('assets/landscape.webp'),
 
               /// Название
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '1. Добавьте название',
-                  style: TextStyle(color: cScheme.primaryContainer),
-                ),
-              ),
-              const Gap(6),
               TextField(
                   controller: titleController,
-                  maxLength: 30,
-                  style: tTheme.headlineSmall!.copyWith(
-                    color: cScheme.primary,
-                  ),
+                  maxLength: 35,
+                  keyboardType: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration(
-                      labelText: 'Название:',
-                      labelStyle: tTheme.titleSmall!.copyWith(
-                        color: labelOpacity,
-                      ),
+                      labelText: 'Добавьте название.',
+                      labelStyle: tTheme.bodySmall!,
                       counterStyle: TextStyle(color: cScheme.primary),
                       enabledBorder: OutlineInputBorder(
                           borderRadius: const BorderRadius.all(
@@ -126,16 +115,9 @@ class AddPlaceScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.all(
                         Radius.circular(10),
                       )))),
+              // const Gap(4),
 
               /// Изображение
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '2. Добавьте снимок или изображение из галереи',
-                  style: TextStyle(color: cScheme.primaryContainer),
-                ),
-              ),
-              const Gap(6),
               ImageInput(
                 onPickImage: (File image) {
                   selectedImage = image;
@@ -145,17 +127,9 @@ class AddPlaceScreen extends ConsumerWidget {
               ),
 
               ///
-              const Gap(18),
+              const Gap(33),
 
               /// Местоположение
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '3. Выберите местоположение - текущее или на карте',
-                  style: TextStyle(color: cScheme.primaryContainer),
-                ),
-              ),
-              const Gap(6),
               LocationInput(
                 onSelectLocation: (PlaceLocation userLocation) {
                   selectedLocation = userLocation;
@@ -182,7 +156,7 @@ class AddPlaceScreen extends ConsumerWidget {
 
 /// ВИДЖЕТЫ:
 
-//* _ImageInput_ ------------------------
+/// _ImageInput_ ------------------------
 class ImageInput extends StatefulWidget {
   const ImageInput({
     super.key,
@@ -203,6 +177,7 @@ class _ImageInputState extends State<ImageInput> {
   File? _selectedImage;
   bool isCamera = true;
 
+  //* Метод получения изображения
   Future<void> _takePicture() async {
     final imagePicker = ImagePicker();
     final pickedImage = await imagePicker.pickImage(
@@ -226,8 +201,40 @@ class _ImageInputState extends State<ImageInput> {
     print('=== МСБ ImageInput!!! ===');
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        /// Место для изобпажения
+        Container(
+          width: deviceWidth * .5,
+          height: deviceWidth * .5,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: cScheme.primary.withOpacity(0.2),
+              width: 1.5,
+            ),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10),
+            ),
+            image: _selectedImage != null
+                ? DecorationImage(
+                    image: FileImage(_selectedImage!),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
+          child: _selectedImage == null
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    'Справа нажмите "Сделать снимок" или "Взять из галереи", чтобы добавить изображение.',
+                    textAlign: TextAlign.center,
+                    style: tTheme.bodySmall,
+                  ))
+              : null,
+        ),
+        const Gap(gap * 2),
+
         /// Выбор источника
         Column(
           children: [
@@ -261,46 +268,12 @@ class _ImageInputState extends State<ImageInput> {
             ),
           ],
         ),
-        const Gap(gap * 2),
-
-        /// Место для изобпажения
-        Container(
-          width: deviceWidth * .5,
-          height: deviceWidth * .5,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: cScheme.primary.withOpacity(0.2),
-              width: 1.5,
-            ),
-            borderRadius: const BorderRadius.all(
-              Radius.circular(10),
-            ),
-            image: _selectedImage != null
-                ? DecorationImage(
-                    image: FileImage(_selectedImage!),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-          ),
-          child: _selectedImage == null
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'Изображение:',
-                    textAlign: TextAlign.center,
-                    style: tTheme.titleSmall!.copyWith(
-                      color: widget.labelOpc,
-                    ),
-                  ))
-              : null,
-        ),
       ],
     );
   }
 }
 
-//* _LocationInput_ --------------------------------
+/// _LocationInput_ --------------------------------
 class LocationInput extends ConsumerStatefulWidget {
   const LocationInput({
     super.key,
@@ -318,8 +291,6 @@ class LocationInput extends ConsumerStatefulWidget {
 }
 
 class ConsumerLocationInputState extends ConsumerState<LocationInput> {
-  // late Future<void> _userAddressFuture;
-  // Future<void> get _userAddressFuture => getUserLocation();
   PlaceLocation? _pickedLocation;
   TextTheme get tTheme => Theme.of(context).textTheme;
   ColorScheme get cScheme => Theme.of(context).colorScheme;
@@ -363,7 +334,6 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
     LocationData? currentLocation;
-    // Point point;
 
     /// 1. Получение разрешений
     serviceEnabled = await location.serviceEnabled();
@@ -438,6 +408,7 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
                         TextField(
                           controller: inputController,
                           keyboardType: TextInputType.multiline,
+                          textCapitalization: TextCapitalization.sentences,
                           maxLength: 170,
                           maxLines: null,
                           style: tTheme.headlineSmall!.copyWith(
@@ -474,8 +445,6 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
     );
   }
 
-  // Point get loc => ref.watch(locationProvider);
-
   @override
   Widget build(BuildContext context) {
     const double gap = 34;
@@ -502,13 +471,11 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
                 ? Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 22,
+                      vertical: 10,
                     ),
                     child: Text(
-                      'Местоположение:',
-                      style: tTheme.titleSmall!.copyWith(
-                        color: widget.labelOpc,
-                      ),
+                      'Добавьте текущее местоположение\n' 'или выберите на карте.',
+                      style: tTheme.bodySmall,
                     ),
                   )
                 : _pickedLocation == null
@@ -522,7 +489,10 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
                           horizontal: 10,
                           vertical: 12,
                         ),
-                        child: Text(_pickedLocation!.address),
+                        child: Text(
+                          _pickedLocation!.address,
+                          style: tTheme.titleMedium,
+                        ),
                       )),
         const Gap(gap / 2),
 
@@ -590,7 +560,7 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
   }
 }
 
-//* _CustomClipPath_ ------------------------------
+/// _CustomClipPath_ ------------------------------
 class CustomClipPath extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

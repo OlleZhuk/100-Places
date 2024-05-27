@@ -50,7 +50,7 @@ class SplashScreen extends StatelessWidget {
                 bottom: 56,
                 child: Text(
                   'МЕСТ',
-                  style: tTheme.titleMedium!.copyWith(
+                  style: tTheme.displayMedium!.copyWith(
                     fontSize: 130,
                   ),
                 ))
