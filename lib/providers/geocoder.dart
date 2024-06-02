@@ -20,14 +20,13 @@ class GetAddress extends StateNotifier<String> {
     double lng,
   ) async {
     String address = '';
-    const error = '⛔НЕПРЕДВИДЕННАЯ ОШИБКА!';
-    const err403 = '⛔АДРЕС НЕ ПОЛУЧЕН!\n' 'Исчерпан ежедневный лимит Яндекса на выдачу адресов. Пожалуйста, введите адрес вручную или повторите попытку завтра.';
-    const noInternet = '⛔АДРЕС НЕ ПОЛУЧЕН!\n' 'Проверьте соединение с интернетом!';
+    final geo = YandexGeocoder(apiKey: '60c7f14a-95e8-4d8b-9b03-b17e48c72f40');
 
-    final YandexGeocoder geo = YandexGeocoder(
-      // apiKey: '0fc3094b-3486-45eb-a27d-8c7b62e062b3', // #4
-      apiKey: '60c7f14a-95e8-4d8b-9b03-b17e48c72f40', // #3
-    );
+    const error = '⛔НЕПРЕДВИДЕННАЯ ОШИБКА!';
+    const err403 = '⛔АДРЕС НЕ ПОЛУЧЕН!\n'
+        'Исчерпан ежедневный лимит на выдачу адресов. Пожалуйста, введите адрес вручную или повторите попытку завтра.';
+    const noInternet = '⛔АДРЕС НЕ ПОЛУЧЕН!\n'
+        'Проверьте соединение с интернетом!';
 
     try {
       final GeocodeResponse gettingAddress = await geo.getGeocode(
@@ -38,7 +37,6 @@ class GetAddress extends StateNotifier<String> {
         )),
       );
       address = gettingAddress.firstAddress?.formatted ?? 'null';
-      // print('=== ГЕОКОДЕР: адрес получен! ===');
 
       state = address;
       //
@@ -55,3 +53,10 @@ class GetAddress extends StateNotifier<String> {
     }
   }
 }
+
+/// Поставщик стрима для отображения адреса на экране карты
+///
+final onMapAddressStreamProvider = StreamProvider.autoDispose<String>((ref) {
+  String address = ref.watch(addressProvider);
+  return Stream.value(address);
+});

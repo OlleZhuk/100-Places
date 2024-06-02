@@ -28,6 +28,7 @@ class AddPlaceScreen extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     PlaceLocation? selectedLocation;
     File? selectedImage;
+    // final selectedLocation = ref.watch(pickedLocationProvider);
     final toolbarH = MediaQuery.sizeOf(context).height * .1;
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
@@ -38,8 +39,8 @@ class AddPlaceScreen extends ConsumerWidget {
     //* Метод сохранения Места (кн. 'Сохранить')
     Future<void> savePlace() async {
       final String enteredTitle = titleController.text;
-
-      if (enteredTitle.isEmpty || selectedImage == null || selectedLocation == null) {
+      selectedLocation = ref.watch(pickedLocationProvider);
+      if (enteredTitle.isEmpty || selectedImage == null) {
         showDialog(
             context: context,
             builder: (context) => WarningAlert(
@@ -55,7 +56,7 @@ class AddPlaceScreen extends ConsumerWidget {
                 }));
         return;
       }
-      if (enteredTitle.isNotEmpty && selectedImage != null && selectedLocation != null) {
+      if (enteredTitle.isNotEmpty && selectedImage != null) {
         Navigator.of(context).pop();
         await ref.read(userPlacesProvider.notifier).addPlace(
               enteredTitle,
@@ -82,6 +83,8 @@ class AddPlaceScreen extends ConsumerWidget {
               ref.read(isCreatingLocationProvider.notifier).state = false;
               ref.invalidate(addressProvider);
               ref.invalidate(locationProvider);
+              // ref.invalidate(pickedLocationProvider);
+              // ref.invalidate(onMapAddressStreamProvider);
               Navigator.of(context).pop();
             },
           )),
@@ -91,7 +94,7 @@ class AddPlaceScreen extends ConsumerWidget {
               child: Column(
             children: [
               /// Фоновая картинка
-              Image.asset('assets/landscape.webp'),
+              Image.asset('assets/images/landscape.webp'),
 
               /// Название
               TextField(
@@ -115,7 +118,6 @@ class AddPlaceScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.all(
                         Radius.circular(10),
                       )))),
-              // const Gap(4),
 
               /// Изображение
               ImageInput(
@@ -131,9 +133,7 @@ class AddPlaceScreen extends ConsumerWidget {
 
               /// Местоположение
               LocationInput(
-                onSelectLocation: (PlaceLocation userLocation) {
-                  selectedLocation = userLocation;
-                },
+                // onSelectLocation: (PlaceLocation userLocation) => selectedLocation = userLocation,
                 labelOpc: labelOpacity,
                 iconSz: iconSize,
               ),
@@ -233,7 +233,7 @@ class _ImageInputState extends State<ImageInput> {
                   ))
               : null,
         ),
-        const Gap(gap * 2),
+        const Gap(gap * 2.1),
 
         /// Выбор источника
         Column(
@@ -242,9 +242,9 @@ class _ImageInputState extends State<ImageInput> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Сделать\n' 'снимок'),
-                  const Gap(gap),
                   Icon(Icons.camera, size: widget.iconSz),
+                  const Gap(gap),
+                  const Text('Сделать\n' 'снимок'),
                 ],
               ),
               onTap: () {
@@ -256,9 +256,9 @@ class _ImageInputState extends State<ImageInput> {
             InkWell(
               child: Row(
                 children: [
-                  const Text('Взять из\n' 'галереи'),
-                  const Gap(gap),
                   Icon(Icons.wallpaper, size: widget.iconSz),
+                  const Gap(gap),
+                  const Text('Взять из\n' 'галереи'),
                 ],
               ),
               onTap: () {
@@ -277,12 +277,12 @@ class _ImageInputState extends State<ImageInput> {
 class LocationInput extends ConsumerStatefulWidget {
   const LocationInput({
     super.key,
-    required this.onSelectLocation,
+    // required this.onSelectLocation,
     required this.labelOpc,
     required this.iconSz,
   });
 
-  final void Function(PlaceLocation location) onSelectLocation;
+  // final void Function(PlaceLocation location) onSelectLocation;
   final Color labelOpc;
   final double iconSz;
 
@@ -291,14 +291,16 @@ class LocationInput extends ConsumerStatefulWidget {
 }
 
 class ConsumerLocationInputState extends ConsumerState<LocationInput> {
-  PlaceLocation? _pickedLocation;
+  PlaceLocation? pickedLocation;
   TextTheme get tTheme => Theme.of(context).textTheme;
   ColorScheme get cScheme => Theme.of(context).colorScheme;
 
   //* Метод компоновки и сохранения полученной локации
   Future<void> _getLocation(double latitude, double longitude) async {
+    //
     /// 1. Получение адреса (геокодер или ручной ввод)
     final addressSource = ref.watch(sourseLocationProvider);
+    // PlaceLocation? pickedLocation;
     String locationAddress;
 
     switch (addressSource) {
@@ -313,19 +315,26 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
         break;
     }
 
-    /// 2. Сохранение координат и адреса в модели локации
-    setState(() {
-      _pickedLocation = PlaceLocation(
-        latitude: latitude,
-        longitude: longitude,
-        address: locationAddress,
-      );
-    });
+    /// 2. Добавление и сохранение координат и адреса в модели локации
+    pickedLocation = PlaceLocation(
+      latitude: latitude,
+      longitude: longitude,
+      address: locationAddress,
+    );
+    ref.read(pickedLocationProvider.notifier).state = pickedLocation!;
 
-    if (_pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
+    // setState(() {
+    //   _pickedLocation = PlaceLocation(
+    //     latitude: latitude,
+    //     longitude: longitude,
+    //     address: locationAddress,
+    //   );
+    // });
+
+    if (pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
 
     /// 3. Передача модели локации на сохранение
-    widget.onSelectLocation(_pickedLocation!);
+    // widget.onSelectLocation(_pickedLocation);
   }
 
   //* Метод получения местоположения пользователя
@@ -379,7 +388,7 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
         onMapLocation.longitude,
       );
     }
-    if (_pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
+    if (pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
   }
 
   //* Метод ручного ввода
@@ -449,6 +458,8 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
   Widget build(BuildContext context) {
     const double gap = 34;
     final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
+    final String address = ref.watch(pickedLocationProvider).address;
+    final AsyncValue<String> addressStream = ref.watch(pickedLocationAddressStreamProvider);
 
     print('=== МСБ LocationInput! ===');
 
@@ -457,43 +468,68 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
         //
         /// Местоположение
         Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: cScheme.primary.withOpacity(.2),
-                width: 1.6,
-              ),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(10),
-              ),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: cScheme.primary.withOpacity(.2),
+              width: 1.6,
             ),
-            child: !isCreatingLocation
-                ? Padding(
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+          child: !isCreatingLocation
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    'Добавьте текущее местоположение\n'
+                    'или выберите на карте.',
+                    style: tTheme.bodySmall,
+                  ),
+                )
+              : addressStream.when(
+                  data: (address) => Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 10,
                     ),
                     child: Text(
-                      'Добавьте текущее местоположение\n' 'или выберите на карте.',
-                      style: tTheme.bodySmall,
+                      address,
+                      textAlign: TextAlign.start,
+                      softWrap: true,
+                      style: tTheme.titleMedium,
                     ),
-                  )
-                : _pickedLocation == null
-                    ? const Center(
-                        child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: CircularProgressIndicator(),
-                      ))
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                        child: Text(
-                          _pickedLocation!.address,
-                          style: tTheme.titleMedium,
-                        ),
-                      )),
+                  ),
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  error: (e, st) => Text(address),
+                ),
+
+          // _pickedLocation == null
+          //     ? const Center(
+          //         child: Padding(
+          //         padding: EdgeInsets.symmetric(vertical: 12),
+          //         child: CircularProgressIndicator(),
+          //       ))
+          //     : Padding(
+          //         padding: const EdgeInsets.
+          //         symmetric(
+          //           horizontal: 10,
+          //           vertical: 12,
+          //         ),
+          //         child: Text(
+          //           _pickedLocation!.address,
+          //           style: tTheme.titleMedium,
+          //         ),
+          //       ),
+        ),
         const Gap(gap / 2),
 
         /// Кнопки выбора местоположения
@@ -583,3 +619,8 @@ class CustomClipPath extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
+
+final pickedLocationAddressStreamProvider = StreamProvider<String>((ref) {
+  String address = ref.watch(pickedLocationProvider).address;
+  return Stream.value(address);
+});

@@ -14,6 +14,16 @@ final startPointProvider = StateProvider<PlaceLocation>((ref) {
   return startPoint;
 });
 
+//* Поставщик полученной локации.
+final pickedLocationProvider = StateProvider<PlaceLocation>((ref) {
+  const pickedLocation = PlaceLocation(
+    address: '',
+    latitude: 0,
+    longitude: 0,
+  );
+  return pickedLocation;
+});
+
 //* Поставщик координат
 final locationProvider = StateProvider<Point>(
   (ref) => const Point(latitude: 0, longitude: 0),

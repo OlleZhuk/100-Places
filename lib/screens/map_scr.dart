@@ -17,7 +17,7 @@ class MapScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    Point? pickedLocation;
+    // Point? pickedLocation;
     final toolbarH = MediaQuery.sizeOf(context).height * .1;
 
     print('=== МСБ ЭК!!! ===');
@@ -33,6 +33,11 @@ class MapScreen extends ConsumerWidget {
             onPressed: () {
               ref.invalidate(addressProvider);
               ref.invalidate(startPointProvider);
+              ref.invalidate(onMapAddressStreamProvider);
+              // ???
+              ref.invalidate(locationProvider);
+              // ???
+              ref.read(onGetAddressProvider.notifier).state = false;
               ref.read(isEditLocationProvider.notifier).state = false;
               Navigator.of(context).pop();
             },
@@ -46,11 +51,11 @@ class MapScreen extends ConsumerWidget {
           labelText: 'Получить адрес',
           buttonIcon: Icons.not_listed_location,
           action: () async {
-            ref.read(isConfirmedLocationProvider.notifier).state = true;
-            pickedLocation = ref.watch(locationProvider);
+            Point? pickedLocation = ref.watch(locationProvider);
+            ref.read(onGetAddressProvider.notifier).state = true;
             await ref.read(addressProvider.notifier).getAddress(
                   pickedLocation!.latitude,
-                  pickedLocation!.longitude,
+                  pickedLocation.longitude,
                 );
           }),
 
@@ -68,11 +73,12 @@ class OnMapAddressView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    Point? gettingLoc;
+    // Point? pickedLocation;
     final cScheme = Theme.of(context).colorScheme;
-    final bool isConfirmedLocation = ref.watch(isConfirmedLocationProvider);
     final String address = ref.watch(addressProvider);
+    final AsyncValue<String> addressStream = ref.watch(onMapAddressStreamProvider);
     final String startPointAddress = ref.watch(startPointProvider).address;
+    final bool isGettingAddress = ref.watch(onGetAddressProvider);
     final String currentDate = ref.watch(dateProvider);
 
     print('=== МСБ OnMapAddressView!!! ===');
@@ -88,29 +94,28 @@ class OnMapAddressView extends ConsumerWidget {
               size: 30,
             ),
             Flexible(
-                child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
 
-                        /// если подтверждаем местоположение, то выводится адрес с геокодера,
-                        /// если нет, то остается текущий (стартовый) адрес Места.
-                        /// При этом, если адрес пуст, видим сообщение.
-                        isConfirmedLocation
-                            ? address.isNotEmpty
-                                ? address
-                                //< сюда нужен индикатор!
-                                : '⛔ОШИБКА!\n' 'Похоже, что сегодня Яндекс не может предоставить адрес.\n' 'Воспользуйтесь ручным вводом или попробуйте завтра.'
-                            : startPointAddress,
-                        textAlign: TextAlign.start,
-                        softWrap: true,
-                        style: TextStyle(
-                          color: cScheme.tertiary,
-                          fontSize: 14,
-                        )))),
+                /// Стрим получения адреса после подтверждения
+                child: addressStream.when(
+                  data: (address) => Text(
+                    isGettingAddress ? address : startPointAddress,
+                    // softWrap: true,
+                    style: TextStyle(
+                      color: cScheme.tertiary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Text(address),
+                ),
+              ),
+            ),
 
             /// Мигающая кнопка сохранения
             Visibility(
-                visible: isConfirmedLocation ? true : false,
+                visible: isGettingAddress ? true : false,
                 child: IconButton(
                     icon: Icon(
                       Icons.save_alt_rounded,
@@ -118,33 +123,37 @@ class OnMapAddressView extends ConsumerWidget {
                       size: 28,
                     )
                         .animate(
-                          delay: 1.seconds,
+                          delay: 2.seconds,
                           onPlay: (controller) => controller.repeat(),
                         )
-                        .fadeOut(
+                        .fadeIn(
                           delay: 700.ms,
+                          duration: 1.seconds,
+                        )
+                        .fadeOut(
+                          delay: 1700.ms,
                           duration: 1.seconds,
                         ),
                     onPressed: () async {
-                      gettingLoc = ref.watch(locationProvider);
+                      Point pickedLocation = ref.watch(locationProvider);
                       bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
-                      if (isCreatingLocation) {
-                        Navigator.of(context).pop(gettingLoc);
-                      } else {
-                        Navigator.of(context).pop();
 
+                      if (isCreatingLocation) {
+                        Navigator.of(context).pop(pickedLocation);
+                      } else {
                         /// Отправляем новую локацию в БД
+                        Navigator.of(context).pop();
                         if (address.isNotEmpty && currentDate.isNotEmpty) {
                           await ref.read(userPlacesProvider.notifier).updateLocation(
-                                gettingLoc!.latitude.toString(),
-                                gettingLoc!.longitude.toString(),
+                                pickedLocation.latitude.toString(),
+                                pickedLocation.longitude.toString(),
                                 address,
                                 currentDate,
                               );
                         }
                       }
                       ref.invalidate(startPointProvider);
-                      ref.read(isConfirmedLocationProvider.notifier).state = false;
+                      ref.read(onGetAddressProvider.notifier).state = false;
                       // ref.invalidate(addressProvider);
                     }))
           ],
@@ -152,7 +161,7 @@ class OnMapAddressView extends ConsumerWidget {
   }
 }
 
-//* Виджет Яндекс-карты
+/// Виджет Яндекс Карты
 class YanMapLocation extends ConsumerStatefulWidget {
   const YanMapLocation({super.key});
 
@@ -184,7 +193,7 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
       //* ----------------
       //
       icon: PlacemarkIcon.single(PlacemarkIconStyle(
-        image: BitmapDescriptor.fromAssetImage('assets/location_icon.webp'),
+        image: BitmapDescriptor.fromAssetImage('assets/images/location_icon.webp'),
         scale: 0.6,
       )),
       opacity: 0.6,
@@ -226,6 +235,8 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
             );
           });
           ref.read(locationProvider.notifier).state = pickedLoc!;
+          //
+          print('${pickedLoc!.latitude}, ${pickedLoc!.longitude}');
         },
       );
 }

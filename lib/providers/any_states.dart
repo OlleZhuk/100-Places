@@ -13,7 +13,7 @@ final titleProvider = StateProvider<String>((ref) => '');
 final isEditLocationProvider = StateProvider<bool>((ref) => false);
 
 /// Флаг для подтверждения выбранной локации на ЭК
-final isConfirmedLocationProvider = StateProvider<bool>((ref) => false);
+final onGetAddressProvider = StateProvider<bool>((ref) => false);
 
 /// Флаг для разделения режимов создания и редактирования локации
 final isCreatingLocationProvider = StateProvider<bool>((ref) => false);

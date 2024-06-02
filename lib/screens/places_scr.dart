@@ -168,7 +168,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                 child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: horPadds),
                     child: Image.asset(
-                      'assets/camera-overlay.webp',
+                      'assets/images/camera-overlay.webp',
                     ).animate().fadeIn(duration: 1.seconds)))
             : FutureBuilder(
                 future: _placesFuture,
