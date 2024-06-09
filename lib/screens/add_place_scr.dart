@@ -26,29 +26,33 @@ class AddPlaceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    PlaceLocation? selectedLocation;
-    File? selectedImage;
-    // final selectedLocation = ref.watch(pickedLocationProvider);
-    final toolbarH = MediaQuery.sizeOf(context).height * .1;
-    final cScheme = Theme.of(context).colorScheme;
-    final tTheme = Theme.of(context).textTheme;
-    final titleController = TextEditingController();
-    final labelOpacity = cScheme.tertiary.withOpacity(.7);
+    final double toolbarH = MediaQuery.sizeOf(context).height * .1;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    // final TextEditingController titleController = TextEditingController();
+    // final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
+    final bool isEntering = ref.watch(isEditTitleProvider);
+    final String enteredTitle = ref.watch(titleProvider);
     const double iconSize = 35;
+    final Color labelOpacity = cScheme.tertiary.withOpacity(.7);
+    final File? imageFile = ref.watch(imageFileProvider);
+    // File? selectedImage;
 
     //* Метод сохранения Места (кн. 'Сохранить')
     Future<void> savePlace() async {
-      final String enteredTitle = titleController.text;
-      selectedLocation = ref.watch(pickedLocationProvider);
-      if (enteredTitle.isEmpty || selectedImage == null) {
-        showDialog(
+      // final String enteredTitle = titleController.text;
+      final PlaceLocation pickedLocation = ref.watch(pickedLocationProvider);
+      final String pickedAddress = pickedLocation.address;
+
+      if (enteredTitle.isEmpty || imageFile == null || pickedAddress.isEmpty) {
+        await showDialog(
             context: context,
             builder: (context) => WarningAlert(
                 warningText: enteredTitle.isEmpty
                     ? 'Пожалуйста, добавьте название!'
-                    : selectedImage == null
+                    : imageFile == null
                         ? 'Пожалуйста, добавьте изображение!'
-                        : selectedLocation == null
+                        : pickedAddress.isEmpty
                             ? 'Пожалуйста, выберите местоположение!'
                             : '',
                 actionOK: () {
@@ -56,55 +60,64 @@ class AddPlaceScreen extends ConsumerWidget {
                 }));
         return;
       }
-      if (enteredTitle.isNotEmpty && selectedImage != null) {
-        Navigator.of(context).pop();
-        await ref.read(userPlacesProvider.notifier).addPlace(
-              enteredTitle,
-              selectedImage!,
-              selectedLocation!,
-            );
-        ref.invalidate(addressProvider);
-        ref.read(isCreatingLocationProvider.notifier).state = false;
-      }
+      Navigator.of(context).pop();
+      await ref.read(userPlacesProvider.notifier).addPlace(
+            enteredTitle,
+            imageFile,
+            pickedLocation,
+          );
+      ref.read(isCreatingLocationProvider.notifier).state = false;
+      ref.invalidate(addressProvider);
+      ref.invalidate(locationProvider);
+      ref.invalidate(pickedLocationProvider);
+      ref.invalidate(pickedLocationStreamAddressProvider);
+      ref.invalidate(manualAddressProvider);
+      ref.invalidate(selectedSourseProvider);
+      ref.read(titleProvider.notifier).state = '';
+      ref.invalidate(isEditTitleProvider);
+      ref.invalidate(imageFileProvider);
+
+      // print('===> ФЛАГ_isCreatingLocation: ${ref.watch(isCreatingLocationProvider)} ===');
     }
 
-    print('=== МСБ ЭДМ!!! ===');
+    //* Метод добавления названия
+    Future<void> enterTitle() async {
+      ref.read(isEditTitleProvider.notifier).state = true;
+      final titleController = TextEditingController();
 
-    return Scaffold(
-      appBar: AppBar(
-          toolbarHeight: toolbarH,
-          title: const Text(
-            'Новое Место:',
-            style: TextStyle(fontSize: 30),
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
-          leading: BackButton(
-            onPressed: () {
-              ref.read(sourseLocationProvider.notifier).state = 'geo';
-              ref.read(isCreatingLocationProvider.notifier).state = false;
-              ref.invalidate(addressProvider);
-              ref.invalidate(locationProvider);
-              // ref.invalidate(pickedLocationProvider);
-              // ref.invalidate(onMapAddressStreamProvider);
-              Navigator.of(context).pop();
-            },
-          )),
-      body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: SingleChildScrollView(
-              child: Column(
-            children: [
-              /// Фоновая картинка
-              Image.asset('assets/images/landscape.webp'),
-
-              /// Название
-              TextField(
+          backgroundColor: cScheme.background.withOpacity(.4),
+          content: Padding(
+              padding: const EdgeInsets.only(top: 5),
+              //
+              child: TextField(
                   controller: titleController,
+                  // onTapOutside: (_) {
+                  //   ref.read(isEditTitleProvider.notifier).state = false;
+                  //   Navigator.of(context).pop();
+                  // },
+                  autofocus: true,
                   maxLength: 35,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
+                  style: tTheme.headlineSmall!.copyWith(
+                    color: cScheme.primary,
+                  ),
                   decoration: InputDecoration(
-                      labelText: 'Добавьте название.',
-                      labelStyle: tTheme.bodySmall!,
+                      labelText: 'Название Места:',
+                      labelStyle: TextStyle(color: cScheme.tertiary),
+                      hintStyle: TextStyle(
+                        color: cScheme.onSecondaryContainer.withOpacity(.3),
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () => titleController.clear(),
+                        icon: const Icon(Icons.clear),
+                      ),
                       counterStyle: TextStyle(color: cScheme.primary),
                       enabledBorder: OutlineInputBorder(
                           borderRadius: const BorderRadius.all(
@@ -117,13 +130,114 @@ class AddPlaceScreen extends ConsumerWidget {
                       border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(
                         Radius.circular(10),
-                      )))),
+                      ))))),
+          actionsPadding: const EdgeInsets.only(
+            right: 24,
+            bottom: 16,
+          ),
+          //
+          actions: [
+            ElevatedButton(
+              child: const Text("ДА"),
+              onPressed: () {
+                final enteredTitle = titleController.text;
+                if (enteredTitle.isEmpty) return;
+
+                ref.read(titleProvider.notifier).state = enteredTitle;
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        )
+            .animate(
+              delay: 500.ms,
+            )
+            .fadeIn(
+              duration: 800.ms,
+            )
+            .scale(
+              curve: Curves.easeOutBack,
+            ),
+      );
+    }
+
+    // print('===> МСБ ЭДМ!!! ===');
+
+    return Scaffold(
+      appBar: AppBar(
+          toolbarHeight: toolbarH,
+          title: const Text(
+            'Новое Место:',
+            style: TextStyle(fontSize: 30),
+          ),
+          leading: BackButton(
+            onPressed: () {
+              ref.invalidate(addressProvider);
+              ref.invalidate(locationProvider);
+              ref.invalidate(pickedLocationProvider);
+              ref.invalidate(pickedLocationStreamAddressProvider);
+              ref.invalidate(manualAddressProvider);
+              ref.invalidate(selectedSourseProvider);
+              ref.invalidate(titleProvider);
+              ref.read(imageFileProvider.notifier).state = null;
+              ref.invalidate(isEditTitleProvider);
+              ref.read(isCreatingLocationProvider.notifier).state = false;
+
+              Navigator.of(context).pop();
+            },
+          )),
+      body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: SingleChildScrollView(
+              child: Column(
+            children: [
+              /// Фоновая картинка
+              Image.asset('assets/images/landscape.webp'),
+
+              /// Название
+              Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(
+                        color: cScheme.primary.withOpacity(.2),
+                        width: 1.6,
+                      )),
+                  child: !isEntering
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          child: InkWell(
+                            onTap: enterTitle,
+                            child: Text(
+                              'Добавьте название.',
+                              style: tTheme.bodySmall,
+                            ),
+                          ))
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          child: InkWell(
+                            onTap: enterTitle,
+                            child: enteredTitle.isEmpty
+                                ? Text(
+                                    'Добавьте название.',
+                                    style: tTheme.bodySmall,
+                                  )
+                                : Text(
+                                    enteredTitle,
+                                    style: tTheme.titleMedium,
+                                  ),
+                          ))),
+              const Gap(16),
 
               /// Изображение
               ImageInput(
-                onPickImage: (File image) {
-                  selectedImage = image;
-                },
                 labelOpc: labelOpacity,
                 iconSz: iconSize,
               ),
@@ -133,7 +247,6 @@ class AddPlaceScreen extends ConsumerWidget {
 
               /// Местоположение
               LocationInput(
-                // onSelectLocation: (PlaceLocation userLocation) => selectedLocation = userLocation,
                 labelOpc: labelOpacity,
                 iconSz: iconSize,
               ),
@@ -157,23 +270,21 @@ class AddPlaceScreen extends ConsumerWidget {
 /// ВИДЖЕТЫ:
 
 /// _ImageInput_ ------------------------
-class ImageInput extends StatefulWidget {
+class ImageInput extends ConsumerStatefulWidget {
   const ImageInput({
     super.key,
-    required this.onPickImage,
     required this.labelOpc,
     required this.iconSz,
   });
 
-  final void Function(File image) onPickImage;
   final Color labelOpc;
   final double iconSz;
 
   @override
-  State<ImageInput> createState() => _ImageInputState();
+  ConsumerState<ImageInput> createState() => ConsumerImageInputState();
 }
 
-class _ImageInputState extends State<ImageInput> {
+class ConsumerImageInputState extends ConsumerState<ImageInput> {
   File? _selectedImage;
   bool isCamera = true;
 
@@ -183,12 +294,11 @@ class _ImageInputState extends State<ImageInput> {
     final pickedImage = await imagePicker.pickImage(
       source: isCamera ? ImageSource.camera : ImageSource.gallery,
     );
-    if (pickedImage == null) {
-      return;
-    }
-    setState(() => _selectedImage = File(pickedImage.path));
 
-    widget.onPickImage(_selectedImage!);
+    if (pickedImage == null) return;
+
+    _selectedImage = File(pickedImage.path);
+    ref.read(imageFileProvider.notifier).state = _selectedImage;
   }
 
   @override
@@ -203,6 +313,7 @@ class _ImageInputState extends State<ImageInput> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        //
         /// Место для изобпажения
         Container(
           width: deviceWidth * .5,
@@ -274,210 +385,217 @@ class _ImageInputState extends State<ImageInput> {
 }
 
 /// _LocationInput_ --------------------------------
-class LocationInput extends ConsumerStatefulWidget {
+class LocationInput extends ConsumerWidget {
   const LocationInput({
     super.key,
-    // required this.onSelectLocation,
     required this.labelOpc,
     required this.iconSz,
   });
 
-  // final void Function(PlaceLocation location) onSelectLocation;
   final Color labelOpc;
   final double iconSz;
 
   @override
-  ConsumerLocationInputState createState() => ConsumerLocationInputState();
-}
+  Widget build(BuildContext context, ref) {
+    PlaceLocation? pickedLocation;
+    String? selectedSourse;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
 
-class ConsumerLocationInputState extends ConsumerState<LocationInput> {
-  PlaceLocation? pickedLocation;
-  TextTheme get tTheme => Theme.of(context).textTheme;
-  ColorScheme get cScheme => Theme.of(context).colorScheme;
+    final String pickedLocationAddress = ref.watch(pickedLocationProvider).address;
+    final AsyncValue<String> pickedLocationStreamAddress = ref.watch(pickedLocationStreamAddressProvider);
+    final double lat = ref.watch(pickedLocationProvider).latitude;
+    final double lng = ref.watch(pickedLocationProvider).longitude;
 
-  //* Метод компоновки и сохранения полученной локации
-  Future<void> _getLocation(double latitude, double longitude) async {
-    //
-    /// 1. Получение адреса (геокодер или ручной ввод)
-    final addressSource = ref.watch(sourseLocationProvider);
-    // PlaceLocation? pickedLocation;
-    String locationAddress;
+    const double gap = 34;
 
-    switch (addressSource) {
-      case 'geo':
-        locationAddress = ref.watch(addressProvider);
-        break;
-      case 'man':
-        locationAddress = ref.watch(manualLocationProvider);
-        break;
-      default:
-        locationAddress = ref.watch(addressProvider);
-        break;
+    //* Метод компоновки и сохранения полученной локации
+    Future<void> getLocation() async {
+      //
+      /// 1. Полуаем КООРДИНАТЫ
+      //
+      final lat = ref.watch(locationProvider).latitude;
+      final lng = ref.watch(locationProvider).longitude;
+
+      /// 2. Получаем АДРЕС
+      // геокодер или ручной ввод
+      //
+      final String selectedSourse = ref.watch(selectedSourseProvider);
+      String? sourceAddress;
+      final String address = ref.watch(addressProvider);
+      final String manAddress = ref.watch(manualAddressProvider);
+
+      // final AsyncValue<String> streamAddress = ref.watch(streamAddressProvider);
+
+      switch (selectedSourse) {
+        case 'geo':
+          sourceAddress = address;
+          break;
+        case 'man':
+          sourceAddress = manAddress;
+          break;
+        default:
+          sourceAddress = address;
+          break;
+      }
+      print('===> getLocation ВЫДАЕТ: $sourceAddress');
+
+      /// 3. Представление полученных данных в модели локации
+      pickedLocation = PlaceLocation(
+        latitude: lat,
+        longitude: lng,
+        address: sourceAddress,
+      );
+
+      /// 4. Запись модели локации в поставщик локации
+      if (pickedLocation != null) {
+        ref.read(pickedLocationProvider.notifier).state = pickedLocation!;
+        ref.read(selectedSourseProvider.notifier).state = 'geo';
+      }
+      // ref.read(isCreatingLocationProvider.notifier).state = false;
+
+      // print('=== ФЛАГ СОЗДАНИЯ ЛОКАЦИИ: ${ref.watch(isCreatingLocationProvider).toString()}');
     }
 
-    /// 2. Добавление и сохранение координат и адреса в модели локации
-    pickedLocation = PlaceLocation(
-      latitude: latitude,
-      longitude: longitude,
-      address: locationAddress,
-    );
-    ref.read(pickedLocationProvider.notifier).state = pickedLocation!;
+    //* Метод получения местоположения пользователя
+    Future<void> getUserLocation() async {
+      final location = Location();
+      bool serviceEnabled;
+      PermissionStatus permissionGranted;
+      LocationData? currentLocation;
 
-    // setState(() {
-    //   _pickedLocation = PlaceLocation(
-    //     latitude: latitude,
-    //     longitude: longitude,
-    //     address: locationAddress,
-    //   );
-    // });
-
-    if (pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
-
-    /// 3. Передача модели локации на сохранение
-    // widget.onSelectLocation(_pickedLocation);
-  }
-
-  //* Метод получения местоположения пользователя
-  Future<void> getUserLocation() async {
-    final location = Location();
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData? currentLocation;
-
-    /// 1. Получение разрешений
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
+      /// 1. Получение разрешений
+      serviceEnabled = await location.serviceEnabled();
       if (!serviceEnabled) {
+        serviceEnabled = await location.requestService();
+        if (!serviceEnabled) {
+          return;
+        }
+      }
+      permissionGranted = await location.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        permissionGranted = await location.requestPermission();
+        if (permissionGranted != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      /// 2. Получение координат текущей локации
+      currentLocation = await location.getLocation();
+      final lat = currentLocation.latitude;
+      final lng = currentLocation.longitude;
+
+      /// 3. Отправка полученных координат
+      if (lat == null || lng == null) {
         return;
       }
-    }
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+      // Включить флаг создания локации
+      ref.read(isCreatingLocationProvider.notifier).state = true;
+      // Отдать в геокодер для получения адреса
+      await ref.read(addressProvider.notifier).getAddress(lat, lng);
+      // Отдать поставщику координат для вызова при компоновке
+      final point = Point(latitude: lat, longitude: lng);
+      ref.read(locationProvider.notifier).state = point;
+      // Отдать на компоновку и показ полученной локации
+      getLocation();
     }
 
-    /// 2. Получение координат текущей локации
-    currentLocation = await location.getLocation();
-    final lat = currentLocation.latitude;
-    final lng = currentLocation.longitude;
-
-    /// 3. Отправка полученных координат
-    if (lat == null || lng == null) {
-      return;
+    //* Метод выбора локации на карте
+    Future<void> getOnMapLocation() async {
+      // Включить флаг создания локации
+      ref.read(isCreatingLocationProvider.notifier).state = true;
+      // Перейти на экран карты для выбора локации
+      await Navigator.of(context).push(MyRouteTransition(
+        const MapScreen(),
+      ));
+      // После сохранения локации на ЭК вызвать компоновку и показ
+      getLocation();
     }
-    final point = Point(latitude: lat, longitude: lng);
-    ref.read(locationProvider.notifier).state = point;
-    await ref.read(addressProvider.notifier).getAddress(lat, lng);
-    ref.read(isCreatingLocationProvider.notifier).state = true;
-    _getLocation(lat, lng);
-  }
 
-  //* Метод выбора локации на карте
-  Future<void> getOnMapLocation() async {
-    ref.read(isCreatingLocationProvider.notifier).state = true;
-    final onMapLocation = await Navigator.of(context).push(MyRouteTransition(
-      const MapScreen(),
-    ));
-    if (onMapLocation != null) {
-      _getLocation(
-        onMapLocation.latitude,
-        onMapLocation.longitude,
+    //* Метод ручного ввода
+    Future<void> manuallyAddressInput(BuildContext context) async {
+      // ref.read(isCreatingLocationProvider.notifier).state = false;
+      ref.read(selectedSourseProvider.notifier).state = 'man';
+
+      final inputController = TextEditingController();
+
+      await showModalBottomSheet(
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        context: context,
+        builder: (BuildContext context) {
+          return ClipPath(
+              clipper: CustomClipPath(),
+              child: Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [cScheme.onPrimary, cScheme.background],
+                  )),
+                  child: Padding(
+                      padding: EdgeInsets.only(
+                        top: 35,
+                        left: 15,
+                        right: 15,
+                        bottom: MediaQuery.viewInsetsOf(context).bottom * 1.1,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: inputController,
+                            keyboardType: TextInputType.multiline,
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLength: 170,
+                            maxLines: null,
+                            style: tTheme.headlineSmall!.copyWith(
+                              color: cScheme.primary,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: 'Введите адрес Места:',
+                              labelStyle: tTheme.bodySmall,
+                              counterStyle: TextStyle(color: cScheme.primary),
+                            ),
+                          ),
+                          const Gap(20),
+                          CustomFAB(
+                              labelText: 'Подтвердить',
+                              buttonIcon: Icons.save_alt,
+                              action: () async {
+                                final manAddress = inputController.text;
+                                if (manAddress.isEmpty) return;
+
+                                ref.read(manualAddressProvider.notifier).state = manAddress;
+                                getLocation();
+
+                                Navigator.of(context).pop();
+
+                                print('===> manuallyAddressInput ВЫДАЕТ: $manAddress');
+                              }),
+                        ],
+                      ))));
+        },
       );
     }
-    if (pickedLocation == null) ref.read(isCreatingLocationProvider.notifier).state = false;
-  }
 
-  //* Метод ручного ввода
-  Future<void> manuallyAddressInput(BuildContext ctx) async {
-    final inputController = TextEditingController();
-
-    await showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      context: ctx,
-      builder: (BuildContext ctx) {
-        return ClipPath(
-            clipper: CustomClipPath(),
-            child: Container(
-                color: cScheme.onPrimary,
-                child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 30,
-                      left: 15,
-                      right: 15,
-                      bottom: MediaQuery.of(ctx).viewInsets.bottom * 1.07,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: inputController,
-                          keyboardType: TextInputType.multiline,
-                          textCapitalization: TextCapitalization.sentences,
-                          maxLength: 170,
-                          maxLines: null,
-                          style: tTheme.headlineSmall!.copyWith(
-                            color: cScheme.primary,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: 'Расположение Места:',
-                            labelStyle: tTheme.titleSmall!.copyWith(
-                              color: cScheme.surfaceTint.withOpacity(.7),
-                            ),
-                            counterStyle: TextStyle(color: cScheme.primary),
-                          ),
-                        ),
-                        const Gap(20),
-                        CustomFAB(
-                            labelText: 'Подтвердить',
-                            buttonIcon: Icons.save_alt,
-                            action: () async {
-                              final manuallyLocation = inputController.text;
-                              if (manuallyLocation.isEmpty) {
-                                return;
-                              }
-                              ref.read(manualLocationProvider.notifier).state = manuallyLocation;
-
-                              double lat = ref.watch(locationProvider).latitude;
-                              double lng = ref.watch(locationProvider).longitude;
-                              _getLocation(lat, lng);
-
-                              Navigator.of(context).pop();
-                            }),
-                      ],
-                    ))));
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const double gap = 34;
-    final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
-    final String address = ref.watch(pickedLocationProvider).address;
-    final AsyncValue<String> addressStream = ref.watch(pickedLocationAddressStreamProvider);
-
-    print('=== МСБ LocationInput! ===');
+    print('===> ФЛАГ_isCreatingLocation: $isCreatingLocation');
+    print('===> МСБ_LocationInput');
+    // print('=== Location $lat и $lng ===');
 
     return Column(
       children: [
         //
-        /// Местоположение
+        /// Бокс с Адресом местоположения
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(
-              color: cScheme.primary.withOpacity(.2),
-              width: 1.6,
-            ),
-            borderRadius: const BorderRadius.all(
-              Radius.circular(10),
-            ),
-          ),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              border: Border.all(
+                color: cScheme.primary.withOpacity(.2),
+                width: 1.6,
+              )),
           child: !isCreatingLocation
               ? Padding(
                   padding: const EdgeInsets.symmetric(
@@ -488,98 +606,86 @@ class ConsumerLocationInputState extends ConsumerState<LocationInput> {
                     'Добавьте текущее местоположение\n'
                     'или выберите на карте.',
                     style: tTheme.bodySmall,
-                  ),
-                )
-              : addressStream.when(
-                  data: (address) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      address,
-                      textAlign: TextAlign.start,
-                      softWrap: true,
-                      style: tTheme.titleMedium,
-                    ),
-                  ),
+                  ))
+              : pickedLocationStreamAddress.when(
+                  data: (pickedLocationAddress) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        pickedLocationAddress,
+                        textAlign: TextAlign.start,
+                        softWrap: true,
+                        style: tTheme.titleMedium,
+                      )),
                   loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  error: (e, st) => Text(address),
+                      child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: CircularProgressIndicator(),
+                  )),
+                  error: (e, st) => Text(pickedLocationAddress),
                 ),
-
-          // _pickedLocation == null
-          //     ? const Center(
-          //         child: Padding(
-          //         padding: EdgeInsets.symmetric(vertical: 12),
-          //         child: CircularProgressIndicator(),
-          //       ))
-          //     : Padding(
-          //         padding: const EdgeInsets.
-          //         symmetric(
-          //           horizontal: 10,
-          //           vertical: 12,
-          //         ),
-          //         child: Text(
-          //           _pickedLocation!.address,
-          //           style: tTheme.titleMedium,
-          //         ),
-          //       ),
         ),
         const Gap(gap / 2),
 
         /// Кнопки выбора местоположения
-        //
+        ///
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             //
-            /// Текущее
+            //* Текущее
             InkWell(
-              onTap: getUserLocation,
-              child: Column(
-                children: [
-                  Icon(Icons.location_on, size: widget.iconSz),
-                  const Text('Текущее'),
-                ],
-              ), // TextAndIcon(
-            ),
-            const Gap(gap),
-
-            /// На карте
-            InkWell(
-              onTap: getOnMapLocation,
-              child: Column(
-                children: [
-                  Icon(Icons.map, size: widget.iconSz),
-                  const Text('На карте'),
-                ],
-              ),
-            ),
-
-            /// Вручную
-            Visibility(
-              visible: isCreatingLocation ? true : false,
-              child: const Gap(gap),
-            ),
-            Visibility(
-              visible: isCreatingLocation ? true : false,
-              child: InkWell(
                 onTap: () {
-                  ref.read(sourseLocationProvider.notifier).state = 'man';
-                  manuallyAddressInput(context);
+                  if (selectedSourse == 'man') {
+                    ref.read(selectedSourseProvider.notifier).state = 'geo';
+                  }
+                  getUserLocation();
                 },
                 child: Column(
                   children: [
-                    Icon(Icons.edit_note, size: widget.iconSz),
-                    const Text('Вручную'),
+                    Icon(Icons.location_on, size: iconSz),
+                    const Text('Текущее'),
                   ],
-                ),
-              )
+                )),
+            const Gap(gap),
+
+            //* На карте
+            InkWell(
+                onTap: () {
+                  // ref.invalidate(pickedLocationStreamAddressProvider);
+                  if (selectedSourse == 'man') {
+                    ref.read(selectedSourseProvider.notifier).state = 'geo';
+                  }
+                  getOnMapLocation();
+                },
+                child: Column(
+                  children: [
+                    Icon(Icons.map, size: iconSz),
+                    const Text('На карте'),
+                  ],
+                )),
+
+            //* Вручную
+            Visibility(
+              visible: isCreatingLocation && lat != 0 && lng != 0,
+              child: const Gap(gap),
+            ),
+            Visibility(
+              visible: isCreatingLocation && lat != 0 && lng != 0,
+              child: InkWell(
+                      onTap: () {
+                        // ref.read(sourseLocationProvider.notifier).state = 'man';
+                        // ref.invalidate(manualLocationProvider);
+                        manuallyAddressInput(context);
+                      },
+                      child: Column(
+                        children: [
+                          Icon(Icons.edit_note, size: iconSz),
+                          const Text('Вручную'),
+                        ],
+                      ))
                   .animate()
                   .fadeIn(
                     duration: 900.ms,
@@ -619,8 +725,3 @@ class CustomClipPath extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
-
-final pickedLocationAddressStreamProvider = StreamProvider<String>((ref) {
-  String address = ref.watch(pickedLocationProvider).address;
-  return Stream.value(address);
-});

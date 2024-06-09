@@ -33,12 +33,11 @@ class MapScreen extends ConsumerWidget {
             onPressed: () {
               ref.invalidate(addressProvider);
               ref.invalidate(startPointProvider);
-              ref.invalidate(onMapAddressStreamProvider);
+              // ref.invalidate(streamAddressProvider);
               // ???
               ref.invalidate(locationProvider);
               // ???
               ref.read(onGetAddressProvider.notifier).state = false;
-              ref.read(isEditLocationProvider.notifier).state = false;
               Navigator.of(context).pop();
             },
           )),
@@ -73,10 +72,9 @@ class OnMapAddressView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    // Point? pickedLocation;
     final cScheme = Theme.of(context).colorScheme;
     final String address = ref.watch(addressProvider);
-    final AsyncValue<String> addressStream = ref.watch(onMapAddressStreamProvider);
+    final AsyncValue<String> streamAddress = ref.watch(streamAddressProvider);
     final String startPointAddress = ref.watch(startPointProvider).address;
     final bool isGettingAddress = ref.watch(onGetAddressProvider);
     final String currentDate = ref.watch(dateProvider);
@@ -98,10 +96,9 @@ class OnMapAddressView extends ConsumerWidget {
                 padding: const EdgeInsets.all(8.0),
 
                 /// Стрим получения адреса после подтверждения
-                child: addressStream.when(
+                child: streamAddress.when(
                   data: (address) => Text(
                     isGettingAddress ? address : startPointAddress,
-                    // softWrap: true,
                     style: TextStyle(
                       color: cScheme.tertiary,
                       fontSize: 14,
@@ -170,14 +167,15 @@ class YanMapLocation extends ConsumerStatefulWidget {
 }
 
 class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
-  late YandexMapController controller;
-  final MapObjectId cameraMapObjectId = const MapObjectId('camera_placemark');
   Point? pickedL;
   Point? pickedLoc;
-  bool get isEditLocation => ref.watch(isEditLocationProvider); //> флаг редактирования местоположения
+
+  bool get isCreatingLocation => ref.watch(isCreatingLocationProvider);
   double get startLat => ref.watch(startPointProvider).latitude;
   double get startLng => ref.watch(startPointProvider).longitude;
 
+  late YandexMapController controller;
+  final MapObjectId cameraMapObjectId = const MapObjectId('camera_placemark');
   late final List<MapObject> mapObjects = [
     PlacemarkMapObject(
       mapId: cameraMapObjectId,
@@ -187,8 +185,8 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
          редактируем -- текущий адрес Места 
       */
       point: Point(
-        latitude: !isEditLocation ? 55.755848 : startLat,
-        longitude: !isEditLocation ? 37.620409 : startLng,
+        latitude: isCreatingLocation ? 55.755848 : startLat,
+        longitude: isCreatingLocation ? 37.620409 : startLng,
       ),
       //* ----------------
       //
@@ -211,7 +209,8 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
           controller = yandexMapController;
           await controller.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
             target: placemarkMapObject.point,
-            zoom: !isEditLocation ? 6 : 16,
+            zoom: isCreatingLocation ? 6 : 16,
+            // zoom: !isEditLocation ? 6 : 16,
           )));
         },
         //

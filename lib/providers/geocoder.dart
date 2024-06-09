@@ -54,9 +54,9 @@ class GetAddress extends StateNotifier<String> {
   }
 }
 
-/// Поставщик стрима для отображения адреса на экране карты
+/// Поставщик стрим-адреса для ЭК и ЭДМ
 ///
-final onMapAddressStreamProvider = StreamProvider.autoDispose<String>((ref) {
+final streamAddressProvider = StreamProvider<String>((ref) {
   String address = ref.watch(addressProvider);
   return Stream.value(address);
 });

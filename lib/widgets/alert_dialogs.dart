@@ -28,7 +28,7 @@ class ConfirmAlert extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
-      backgroundColor: cScheme.surfaceVariant.withOpacity(.6),
+      backgroundColor: cScheme.surfaceVariant.withOpacity(.7),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actionsPadding: const EdgeInsets.only(bottom: 24),
       actions: [

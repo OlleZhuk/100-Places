@@ -28,3 +28,9 @@ final pickedLocationProvider = StateProvider<PlaceLocation>((ref) {
 final locationProvider = StateProvider<Point>(
   (ref) => const Point(latitude: 0, longitude: 0),
 );
+
+//* Поставщик стрима для отображения адреса на экране добавления Места
+final pickedLocationStreamAddressProvider = StreamProvider<String>((ref) {
+  String pickedLocationAddress = ref.watch(pickedLocationProvider).address;
+  return Stream.value(pickedLocationAddress);
+});

@@ -31,6 +31,7 @@ class PlaceDetailScreen extends ConsumerWidget {
     final cScheme = Theme.of(context).colorScheme;
     final tTheme = Theme.of(context).textTheme;
     final toolbarH = MediaQuery.sizeOf(context).height * .1;
+
     final currentDate = place.date;
     final currentLocation = place.location;
 
@@ -88,11 +89,12 @@ class PlaceDetailScreen extends ConsumerWidget {
               onPressed: () async {
                 ref.read(isEditTitleProvider.notifier).state = true;
                 final enteredTitle = titleController.text;
-                if (enteredTitle.isEmpty) {
-                  return;
-                }
+
+                if (enteredTitle.isEmpty) return;
+
                 Navigator.of(context).pop();
                 ref.read(titleProvider.notifier).state = enteredTitle;
+
                 await ref.read(userPlacesProvider.notifier).updateTitle(
                       enteredTitle, // title
                       place.date, // date
@@ -116,6 +118,7 @@ class PlaceDetailScreen extends ConsumerWidget {
     //* Метод редакции местоположения
     Future<void> editLocation() async {
       ref.read(isEditLocationProvider.notifier).state = true;
+
       ref.read(startPointProvider.notifier).state = currentLocation;
       ref.read(dateProvider.notifier).state = currentDate;
 
@@ -219,7 +222,6 @@ class PlaceDetailScreen extends ConsumerWidget {
         leading: BackButton(
           onPressed: () {
             ref.read(isEditTitleProvider.notifier).state = false;
-            ref.read(isEditLocationProvider.notifier).state = false;
             ref.invalidate(addressProvider);
             Navigator.of(context).pop();
           },
@@ -307,10 +309,11 @@ class OnDetailsAddressView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final cScheme = Theme.of(context).colorScheme;
-    final isEditLocation = ref.watch(isEditLocationProvider);
-    final currentAddress = currentPlace.location.address;
-    final newAddress = ref.watch(addressProvider);
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final bool isEditLocation = ref.watch(isEditLocationProvider);
+    final String currentAddress = currentPlace.location.address;
+    final String newAddress = ref.watch(addressProvider);
+    // final newAddress = ref.watch(pickedLocationProvider).address;
 
     /// Если не редактируем местоположение, то текущий адрес.
     /// Если редактируем и не пустой, - новый адрес,
