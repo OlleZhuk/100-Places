@@ -29,18 +29,15 @@ class AddPlaceScreen extends ConsumerWidget {
     final double toolbarH = MediaQuery.sizeOf(context).height * .1;
     final ColorScheme cScheme = Theme.of(context).colorScheme;
     final TextTheme tTheme = Theme.of(context).textTheme;
-    // final TextEditingController titleController = TextEditingController();
-    // final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
-    final bool isEntering = ref.watch(isEditTitleProvider);
+
     final String enteredTitle = ref.watch(titleProvider);
-    const double iconSize = 35;
-    final Color labelOpacity = cScheme.tertiary.withOpacity(.7);
     final File? imageFile = ref.watch(imageFileProvider);
-    // File? selectedImage;
+
+    const double iconSize = 35;
+    const double gapV = 20;
 
     //* Метод сохранения Места (кн. 'Сохранить')
     Future<void> savePlace() async {
-      // final String enteredTitle = titleController.text;
       final PlaceLocation pickedLocation = ref.watch(pickedLocationProvider);
       final String pickedAddress = pickedLocation.address;
 
@@ -55,34 +52,32 @@ class AddPlaceScreen extends ConsumerWidget {
                         : pickedAddress.isEmpty
                             ? 'Пожалуйста, выберите местоположение!'
                             : '',
-                actionOK: () {
-                  Navigator.of(context).pop();
-                }));
+                actionOK: () => Navigator.of(context).pop()));
         return;
       }
-      Navigator.of(context).pop();
+
       await ref.read(userPlacesProvider.notifier).addPlace(
             enteredTitle,
             imageFile,
             pickedLocation,
           );
+
       ref.read(isCreatingLocationProvider.notifier).state = false;
+      ref.invalidate(isEditTitleProvider);
+      ref.read(titleProvider.notifier).state = '';
+      ref.read(imageFileProvider.notifier).state = null;
       ref.invalidate(addressProvider);
       ref.invalidate(locationProvider);
       ref.invalidate(pickedLocationProvider);
       ref.invalidate(pickedLocationStreamAddressProvider);
       ref.invalidate(manualAddressProvider);
       ref.invalidate(selectedSourseProvider);
-      ref.read(titleProvider.notifier).state = '';
-      ref.invalidate(isEditTitleProvider);
-      ref.invalidate(imageFileProvider);
 
-      // print('===> ФЛАГ_isCreatingLocation: ${ref.watch(isCreatingLocationProvider)} ===');
+      if (context.mounted) Navigator.of(context).pop();
     }
 
     //* Метод добавления названия
     Future<void> enterTitle() async {
-      ref.read(isEditTitleProvider.notifier).state = true;
       final titleController = TextEditingController();
 
       await showDialog(
@@ -97,14 +92,15 @@ class AddPlaceScreen extends ConsumerWidget {
               //
               child: TextField(
                   controller: titleController,
-                  // onTapOutside: (_) {
-                  //   ref.read(isEditTitleProvider.notifier).state = false;
-                  //   Navigator.of(context).pop();
-                  // },
                   autofocus: true,
                   maxLength: 35,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
+                  onSubmitted: (value) {
+                    if (value.isEmpty) return;
+                    ref.read(titleProvider.notifier).state = value;
+                    Navigator.of(context).pop();
+                  },
                   style: tTheme.headlineSmall!.copyWith(
                     color: cScheme.primary,
                   ),
@@ -149,27 +145,20 @@ class AddPlaceScreen extends ConsumerWidget {
               },
             ),
           ],
-        )
-            .animate(
-              delay: 500.ms,
-            )
-            .fadeIn(
-              duration: 800.ms,
-            )
-            .scale(
+        ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
               curve: Curves.easeOutBack,
             ),
       );
     }
-
     // print('===> МСБ ЭДМ!!! ===');
 
+    //* Экран Добавления Места
     return Scaffold(
       appBar: AppBar(
           toolbarHeight: toolbarH,
-          title: const Text(
+          title: Text(
             'Новое Место:',
-            style: TextStyle(fontSize: 30),
+            style: TextStyle(fontSize: toolbarH * .4),
           ),
           leading: BackButton(
             onPressed: () {
@@ -179,9 +168,9 @@ class AddPlaceScreen extends ConsumerWidget {
               ref.invalidate(pickedLocationStreamAddressProvider);
               ref.invalidate(manualAddressProvider);
               ref.invalidate(selectedSourseProvider);
-              ref.invalidate(titleProvider);
-              ref.read(imageFileProvider.notifier).state = null;
+              ref.read(titleProvider.notifier).state = '';
               ref.invalidate(isEditTitleProvider);
+              ref.read(imageFileProvider.notifier).state = null;
               ref.read(isCreatingLocationProvider.notifier).state = false;
 
               Navigator.of(context).pop();
@@ -192,67 +181,44 @@ class AddPlaceScreen extends ConsumerWidget {
           child: SingleChildScrollView(
               child: Column(
             children: [
-              /// Фоновая картинка
+              //< Фоновая картинка
               Image.asset('assets/images/landscape.webp'),
-
-              /// Название
+              //
+              //< Название Места
               Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      border: Border.all(
-                        color: cScheme.primary.withOpacity(.2),
-                        width: 1.6,
-                      )),
-                  child: !isEntering
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 10,
-                          ),
-                          child: InkWell(
-                            onTap: enterTitle,
-                            child: Text(
-                              'Добавьте название.',
-                              style: tTheme.bodySmall,
-                            ),
-                          ))
-                      : Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 10,
-                          ),
-                          child: InkWell(
-                            onTap: enterTitle,
-                            child: enteredTitle.isEmpty
-                                ? Text(
-                                    'Добавьте название.',
-                                    style: tTheme.bodySmall,
-                                  )
-                                : Text(
-                                    enteredTitle,
-                                    style: tTheme.titleMedium,
-                                  ),
-                          ))),
-              const Gap(16),
-
-              /// Изображение
-              ImageInput(
-                labelOpc: labelOpacity,
-                iconSz: iconSize,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    border: Border.all(
+                      color: cScheme.primary.withOpacity(.2),
+                      width: 1.6,
+                    )),
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 10,
+                    ),
+                    child: InkWell(
+                        onTap: enterTitle,
+                        child: enteredTitle.isEmpty
+                            ? Text(
+                                'Добавьте название.',
+                                style: tTheme.bodySmall,
+                              )
+                            : Text(
+                                enteredTitle,
+                                style: tTheme.titleMedium,
+                              ))),
               ),
-
-              ///
-              const Gap(33),
-
-              /// Местоположение
-              LocationInput(
-                labelOpc: labelOpacity,
-                iconSz: iconSize,
-              ),
-
-              ///
-              const Gap(90),
+              const Gap(gapV),
+              //
+              //< Изображение Места
+              const ImageInput(iconSz: iconSize),
+              const Gap(gapV),
+              //
+              //< Местоположение
+              const LocationInput(iconSz: iconSize),
+              const Gap(gapV * 10),
             ],
           ))),
 
@@ -270,51 +236,43 @@ class AddPlaceScreen extends ConsumerWidget {
 /// ВИДЖЕТЫ:
 
 /// _ImageInput_ ------------------------
-class ImageInput extends ConsumerStatefulWidget {
+class ImageInput extends ConsumerWidget {
   const ImageInput({
     super.key,
-    required this.labelOpc,
     required this.iconSz,
   });
 
-  final Color labelOpc;
   final double iconSz;
 
   @override
-  ConsumerState<ImageInput> createState() => ConsumerImageInputState();
-}
+  Widget build(BuildContext context, ref) {
+    File? selectedImage;
+    bool isCamera = true;
 
-class ConsumerImageInputState extends ConsumerState<ImageInput> {
-  File? _selectedImage;
-  bool isCamera = true;
-
-  //* Метод получения изображения
-  Future<void> _takePicture() async {
-    final imagePicker = ImagePicker();
-    final pickedImage = await imagePicker.pickImage(
-      source: isCamera ? ImageSource.camera : ImageSource.gallery,
-    );
-
-    if (pickedImage == null) return;
-
-    _selectedImage = File(pickedImage.path);
-    ref.read(imageFileProvider.notifier).state = _selectedImage;
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    final double deviceWidth = MediaQuery.sizeOf(context).width;
+    final File? receivedImage = ref.watch(imageFileProvider);
     const double gap = 14;
-    final cScheme = Theme.of(context).colorScheme;
-    final tTheme = Theme.of(context).textTheme;
-    final deviceWidth = MediaQuery.sizeOf(context).width;
 
-    print('=== МСБ ImageInput!!! ===');
+    //* Метод получения изображения
+    Future<void> takePicture() async {
+      final imagePicker = ImagePicker();
+      final pickedImage = await imagePicker.pickImage(
+        source: isCamera ? ImageSource.camera : ImageSource.gallery,
+      );
+      if (pickedImage == null) return;
+      selectedImage = File(pickedImage.path);
+      ref.read(imageFileProvider.notifier).state = selectedImage;
+    }
+
+    // print('=== МСБ ImageInput!!! ===');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         //
-        /// Место для изобпажения
+        //` Бокс для изображения
         Container(
           width: deviceWidth * .5,
           height: deviceWidth * .5,
@@ -327,14 +285,17 @@ class ConsumerImageInputState extends ConsumerState<ImageInput> {
             borderRadius: const BorderRadius.all(
               Radius.circular(10),
             ),
-            image: _selectedImage != null
+            //
+            //` Картинка здесь:                   >
+            image: receivedImage != null
                 ? DecorationImage(
-                    image: FileImage(_selectedImage!),
+                    image: FileImage(receivedImage),
                     fit: BoxFit.cover,
                   )
                 : null,
           ),
-          child: _selectedImage == null
+          //`
+          child: receivedImage == null
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
@@ -346,37 +307,36 @@ class ConsumerImageInputState extends ConsumerState<ImageInput> {
         ),
         const Gap(gap * 2.1),
 
-        /// Выбор источника
+        //` Выбор источника
         Column(
           children: [
             InkWell(
+              onTap: () {
+                isCamera = true;
+                takePicture();
+              },
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.camera, size: widget.iconSz),
+                  Icon(Icons.camera, size: iconSz),
                   const Gap(gap),
                   const Text('Сделать\n' 'снимок'),
                 ],
               ),
-              onTap: () {
-                isCamera = true;
-                _takePicture();
-              },
             ),
             const Gap(gap * 2.5),
             InkWell(
-              child: Row(
-                children: [
-                  Icon(Icons.wallpaper, size: widget.iconSz),
-                  const Gap(gap),
-                  const Text('Взять из\n' 'галереи'),
-                ],
-              ),
-              onTap: () {
-                isCamera = false;
-                _takePicture();
-              },
-            ),
+                onTap: () {
+                  isCamera = false;
+                  takePicture();
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.wallpaper, size: iconSz),
+                    const Gap(gap),
+                    const Text('Взять из\n' 'галереи'),
+                  ],
+                )),
           ],
         ),
       ],
@@ -388,11 +348,9 @@ class ConsumerImageInputState extends ConsumerState<ImageInput> {
 class LocationInput extends ConsumerWidget {
   const LocationInput({
     super.key,
-    required this.labelOpc,
     required this.iconSz,
   });
 
-  final Color labelOpc;
   final double iconSz;
 
   @override
@@ -426,8 +384,6 @@ class LocationInput extends ConsumerWidget {
       final String address = ref.watch(addressProvider);
       final String manAddress = ref.watch(manualAddressProvider);
 
-      // final AsyncValue<String> streamAddress = ref.watch(streamAddressProvider);
-
       switch (selectedSourse) {
         case 'geo':
           sourceAddress = address;
@@ -439,7 +395,7 @@ class LocationInput extends ConsumerWidget {
           sourceAddress = address;
           break;
       }
-      print('===> getLocation ВЫДАЕТ: $sourceAddress');
+      // print('===> getLocation ВЫДАЕТ: $sourceAddress');
 
       /// 3. Представление полученных данных в модели локации
       pickedLocation = PlaceLocation(
@@ -453,7 +409,6 @@ class LocationInput extends ConsumerWidget {
         ref.read(pickedLocationProvider.notifier).state = pickedLocation!;
         ref.read(selectedSourseProvider.notifier).state = 'geo';
       }
-      // ref.read(isCreatingLocationProvider.notifier).state = false;
 
       // print('=== ФЛАГ СОЗДАНИЯ ЛОКАЦИИ: ${ref.watch(isCreatingLocationProvider).toString()}');
     }
@@ -515,9 +470,7 @@ class LocationInput extends ConsumerWidget {
 
     //* Метод ручного ввода
     Future<void> manuallyAddressInput(BuildContext context) async {
-      // ref.read(isCreatingLocationProvider.notifier).state = false;
       ref.read(selectedSourseProvider.notifier).state = 'man';
-
       final inputController = TextEditingController();
 
       await showModalBottomSheet(
@@ -572,7 +525,7 @@ class LocationInput extends ConsumerWidget {
 
                                 Navigator.of(context).pop();
 
-                                print('===> manuallyAddressInput ВЫДАЕТ: $manAddress');
+                                // print('===> manuallyAddressInput ВЫДАЕТ: $manAddress');
                               }),
                         ],
                       ))));
@@ -580,14 +533,14 @@ class LocationInput extends ConsumerWidget {
       );
     }
 
-    print('===> ФЛАГ_isCreatingLocation: $isCreatingLocation');
-    print('===> МСБ_LocationInput');
+    // print('===> ФЛАГ_isCreatingLocation: $isCreatingLocation');
+    // print('===> МСБ_LocationInput');
     // print('=== Location $lat и $lng ===');
 
     return Column(
       children: [
         //
-        /// Бокс с Адресом местоположения
+        //< Бокс с адресом местоположения
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -603,7 +556,7 @@ class LocationInput extends ConsumerWidget {
                     vertical: 10,
                   ),
                   child: Text(
-                    'Добавьте текущее местоположение\n'
+                    'Добавьте своё текущее местоположение\n'
                     'или выберите на карте.',
                     style: tTheme.bodySmall,
                   ))
@@ -629,8 +582,7 @@ class LocationInput extends ConsumerWidget {
         ),
         const Gap(gap / 2),
 
-        /// Кнопки выбора местоположения
-        ///
+        //< Кнопки выбора местоположения
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -676,8 +628,6 @@ class LocationInput extends ConsumerWidget {
               visible: isCreatingLocation && lat != 0 && lng != 0,
               child: InkWell(
                       onTap: () {
-                        // ref.read(sourseLocationProvider.notifier).state = 'man';
-                        // ref.invalidate(manualLocationProvider);
                         manuallyAddressInput(context);
                       },
                       child: Column(

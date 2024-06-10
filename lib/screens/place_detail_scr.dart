@@ -1,4 +1,4 @@
-/// Экран Информации о Месте, ЭИМ
+/// Экран Детальной Информации, ЭДИ
 library;
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -28,12 +28,14 @@ class PlaceDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    final cScheme = Theme.of(context).colorScheme;
-    final tTheme = Theme.of(context).textTheme;
-    final toolbarH = MediaQuery.sizeOf(context).height * .1;
-
-    final currentDate = place.date;
-    final currentLocation = place.location;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    final double toolbarH = MediaQuery.sizeOf(context).height * .1;
+    final String currentDate = place.date;
+    final PlaceLocation currentLocation = place.location;
+    final String title = ref.watch(titleProvider);
+    final bool isEdit = ref.watch(isEditTitleProvider);
+    final String address = ref.watch(addressProvider);
 
     //* Метод редакции названия
     Future<void> editTitle() async {
@@ -55,6 +57,17 @@ class PlaceDetailScreen extends ConsumerWidget {
                   maxLength: 35,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
+                  onSubmitted: (value) async {
+                    ref.read(isEditTitleProvider.notifier).state = true;
+                    if (value.isEmpty) return;
+                    ref.read(titleProvider.notifier).state = value;
+
+                    await ref.read(userPlacesProvider.notifier).updateTitle(
+                          value, // title
+                          place.date, // date
+                        );
+                    if (context.mounted) Navigator.of(context).pop();
+                  },
                   style: tTheme.headlineSmall!.copyWith(
                     color: cScheme.primary,
                   ),
@@ -64,7 +77,10 @@ class PlaceDetailScreen extends ConsumerWidget {
                       hintStyle: TextStyle(
                         color: cScheme.onSecondaryContainer.withOpacity(.3),
                       ),
-                      suffixIcon: IconButton(onPressed: () => titleController.clear(), icon: const Icon(Icons.clear)),
+                      suffixIcon: IconButton(
+                        onPressed: () => titleController.clear(),
+                        icon: const Icon(Icons.clear),
+                      ),
                       counterStyle: TextStyle(color: cScheme.primary),
                       enabledBorder: OutlineInputBorder(
                           borderRadius: const BorderRadius.all(
@@ -89,27 +105,20 @@ class PlaceDetailScreen extends ConsumerWidget {
               onPressed: () async {
                 ref.read(isEditTitleProvider.notifier).state = true;
                 final enteredTitle = titleController.text;
-
                 if (enteredTitle.isEmpty) return;
-
-                Navigator.of(context).pop();
                 ref.read(titleProvider.notifier).state = enteredTitle;
 
                 await ref.read(userPlacesProvider.notifier).updateTitle(
                       enteredTitle, // title
                       place.date, // date
                     );
+
+                // ref.read(isEditTitleProvider.notifier).state = false;
+                if (context.mounted) Navigator.of(context).pop();
               },
             ),
           ],
-        )
-            .animate(
-              delay: 500.ms,
-            )
-            .fadeIn(
-              duration: 800.ms,
-            )
-            .scale(
+        ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
               curve: Curves.easeOutBack,
             ),
       );
@@ -118,7 +127,6 @@ class PlaceDetailScreen extends ConsumerWidget {
     //* Метод редакции местоположения
     Future<void> editLocation() async {
       ref.read(isEditLocationProvider.notifier).state = true;
-
       ref.read(startPointProvider.notifier).state = currentLocation;
       ref.read(dateProvider.notifier).state = currentDate;
 
@@ -131,6 +139,7 @@ class PlaceDetailScreen extends ConsumerWidget {
     Future<void> shareContent() async {
       final lat = place.location.latitude >= 0 ? '| СШ' : '| ЮШ';
       final lng = place.location.longitude >= 0 ? '| ВД' : '| ЗД';
+
       await Share.shareXFiles(
         [XFile(place.image.path)],
         text: 'НАЗВАНИЕ:\n'
@@ -211,46 +220,60 @@ class PlaceDetailScreen extends ConsumerWidget {
       itemBuilder: (BuildContext ctx) => getMenuItems,
     );
 
-    print('=== МСБ ЭИМ!!! ===');
+    //* Метод обнуления поставщиков кнопкой/жестом "Назад"
+    Future<bool> backGesture() async {
+      if (title.isNotEmpty) ref.read(titleProvider.notifier).state = '';
+      if (isEdit) ref.read(isEditTitleProvider.notifier).state = false;
+      if (address.isNotEmpty) ref.invalidate(addressProvider);
+      // Navigator.of(context).pop();
+      return true;
+    }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: TitleView(currentPlace: place),
-        toolbarHeight: toolbarH,
-        leading: BackButton(
-          onPressed: () {
-            ref.read(isEditTitleProvider.notifier).state = false;
-            ref.invalidate(addressProvider);
-            Navigator.of(context).pop();
-          },
-        ),
-        actions: [popUpMenu],
-      ),
-      //
-      body: SafeArea(
-        child: PhotoView(
-          backgroundDecoration: BoxDecoration(
-            color: cScheme.background,
+    // print('=== МСБ ЭИМ!!! ===');
+
+    //* Экран Детальной Информации
+    return WillPopScope(
+      onWillPop: backGesture,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: TitleView(currentPlace: place),
+          toolbarHeight: toolbarH,
+          leading: BackButton(
+            onPressed: () {
+              if (title.isNotEmpty) ref.read(titleProvider.notifier).state = '';
+              if (isEdit) ref.read(isEditTitleProvider.notifier).state = false;
+              if (address.isNotEmpty) ref.invalidate(addressProvider);
+              Navigator.of(context).pop();
+            },
           ),
-          imageProvider: Image.file(
-            place.image,
-            filterQuality: FilterQuality.medium,
-          ).image,
-        )
-            .animate()
-            .scale(
-              duration: 800.ms,
-              curve: Curves.easeOut,
-            )
-            .fadeIn(
-              duration: 2.seconds,
+          actions: [popUpMenu],
+        ),
+        //
+        body: SafeArea(
+          child: PhotoView(
+            backgroundDecoration: BoxDecoration(
+              color: cScheme.background,
             ),
-      ),
-      //
-      bottomNavigationBar: OnDetailsAddressView(
-        currentPlace: place,
+            imageProvider: Image.file(
+              place.image,
+              filterQuality: FilterQuality.medium,
+            ).image,
+          )
+              .animate()
+              .scale(
+                duration: 800.ms,
+                curve: Curves.easeOut,
+              )
+              .fadeIn(
+                duration: 2.seconds,
+              ),
+        ),
+        //
+        bottomNavigationBar: OnDetailsAddressView(
+          currentPlace: place,
+        ),
       ),
     );
   }
@@ -258,7 +281,7 @@ class PlaceDetailScreen extends ConsumerWidget {
 
 /// ВИДЖЕТЫ --------------------------------
 ///
-//* Виджет отображения названия
+/// Виджет отображения названия
 class TitleView extends ConsumerWidget {
   const TitleView({
     super.key,
@@ -269,6 +292,7 @@ class TitleView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final double fontSz = MediaQuery.sizeOf(context).height * .043;
     final bool isEditTitle = ref.watch(isEditTitleProvider);
     final String currentTitle = currentPlace.title;
     final String newTitle = ref.watch(titleProvider);
@@ -290,7 +314,7 @@ class TitleView extends ConsumerWidget {
         maxLines: 2,
         style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: Theme.of(context).colorScheme.primary,
-              fontSize: 32,
+              fontSize: fontSz,
               height: .9,
             ),
       ).animate(delay: 1.seconds).shakeX(duration: 200.ms),
@@ -298,7 +322,7 @@ class TitleView extends ConsumerWidget {
   }
 }
 
-//* Виджет отображения адреса
+/// Виджет отображения адреса
 class OnDetailsAddressView extends ConsumerWidget {
   const OnDetailsAddressView({
     super.key,
@@ -313,7 +337,6 @@ class OnDetailsAddressView extends ConsumerWidget {
     final bool isEditLocation = ref.watch(isEditLocationProvider);
     final String currentAddress = currentPlace.location.address;
     final String newAddress = ref.watch(addressProvider);
-    // final newAddress = ref.watch(pickedLocationProvider).address;
 
     /// Если не редактируем местоположение, то текущий адрес.
     /// Если редактируем и не пустой, - новый адрес,
@@ -337,15 +360,13 @@ class OnDetailsAddressView extends ConsumerWidget {
                   ),
                   const Gap(12),
                   Expanded(
-                    child: Text(
-                      address,
-                      textAlign: TextAlign.start,
-                      softWrap: true,
-                      style: TextStyle(
-                        color: cScheme.tertiary,
-                        fontSize: 14,
-                      ),
-                    ),
+                    child: Text(address,
+                        textAlign: TextAlign.start,
+                        softWrap: true,
+                        style: TextStyle(
+                          color: cScheme.tertiary,
+                          fontSize: 14,
+                        )),
                   )
                 ],
               ))

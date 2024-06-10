@@ -26,43 +26,6 @@ class PlacesScreen extends ConsumerStatefulWidget {
 class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   late Future<void> _placesFuture;
   String sortCase = '';
-  ColorScheme get cScheme => Theme.of(context).colorScheme;
-
-  //* Виджет выпадающего меню сортировки
-  Widget get popUpSortMenu => PopupMenuButton(
-      offset: const Offset(0, -10),
-      icon: Icon(
-        Icons.sort,
-        size: 30,
-        color: cScheme.inversePrimary,
-      ),
-      itemBuilder: (ctx) => [
-            PopupMenuItem(
-                value: 'AZ',
-                child: const Text('Названия А-Я').animate().flipH(
-                      duration: 300.ms,
-                    )),
-            PopupMenuItem(
-                value: 'ZA',
-                child: const Text('Названия Я-А').animate().flipH(
-                      duration: 400.ms,
-                    )),
-            PopupMenuItem(
-                value: 'new',
-                child: const Text('Сначала новые').animate().flipH(
-                      duration: 500.ms,
-                    )),
-            PopupMenuItem(
-                value: 'old',
-                child: const Text('Сначала старые').animate().flipH(
-                      duration: 600.ms,
-                    )),
-          ],
-      onSelected: (String value) {
-        setState(() {
-          sortCase = value;
-        });
-      });
 
   @override
   void initState() {
@@ -73,13 +36,50 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   @override
   Widget build(context) {
     List<Place> userPlaces = ref.watch(userPlacesProvider);
-    final toolbarH = MediaQuery.sizeOf(context).height * .1;
-    final tTheme = Theme.of(context).textTheme;
-    final q = userPlaces.length;
+    final double toolbarH = MediaQuery.sizeOf(context).height * .1;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final int q = userPlaces.length;
     const double horPadds = 30;
 
+    //* Виджет выпадающего меню сортировки
+    final PopupMenuButton<String> popUpSortMenu = PopupMenuButton(
+        offset: const Offset(0, -10),
+        icon: Icon(
+          Icons.sort,
+          size: 30,
+          color: cScheme.inversePrimary,
+        ),
+        itemBuilder: (ctx) => [
+              PopupMenuItem(
+                  value: 'AZ',
+                  child: const Text('Названия А-Я').animate().flipH(
+                        duration: 300.ms,
+                      )),
+              PopupMenuItem(
+                  value: 'ZA',
+                  child: const Text('Названия Я-А').animate().flipH(
+                        duration: 400.ms,
+                      )),
+              PopupMenuItem(
+                  value: 'new',
+                  child: const Text('Сначала новые').animate().flipH(
+                        duration: 500.ms,
+                      )),
+              PopupMenuItem(
+                  value: 'old',
+                  child: const Text('Сначала старые').animate().flipH(
+                        duration: 600.ms,
+                      )),
+            ],
+        onSelected: (String value) {
+          setState(() {
+            sortCase = value;
+          });
+        });
+
     //* Виджет выпадающего основного меню
-    final popUpMainMenu = PopupMenuButton(
+    final PopupMenuButton popUpMainMenu = PopupMenuButton(
         offset: const Offset(0, -10),
         icon: Icon(
           Icons.menu,
@@ -119,42 +119,46 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
             ]);
 
     //* Виджет заголовка панели приложений
-    final titleWidget = Row(
+    final Row titleWidget = Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        //< Иконка >
         Icon(
           Icons.local_see_rounded,
           color: cScheme.primary,
-          size: 30,
+          size: toolbarH * .42,
         ),
         const Gap(12),
+        //< 100 >
         Text(
           '100',
           style: tTheme.titleLarge!.copyWith(
-            fontSize: 30,
+            fontSize: toolbarH * .4,
           ),
         ),
-        const Gap(10),
+        const Gap(4),
+        //< Мест >
         Badge.count(
-            largeSize: 18,
-            smallSize: 8,
+            largeSize: 16,
+            smallSize: 10,
             backgroundColor: cScheme.primaryContainer,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            offset: const Offset(20, 0),
+            offset: const Offset(16, 0),
             count: q,
             textStyle: tTheme.labelMedium,
             //
             child: Text('Мест',
                 style: tTheme.titleLarge!.copyWith(
-                  fontSize: 30,
+                  fontSize: toolbarH * .4,
                   fontWeight: FontWeight.w600,
                 )))
       ],
     );
 
-    print('=== МСБ ЭСМ!!! ===');
+    // print('=== МСБ ЭСМ!!! ===');
     // print('=== $horPadds ===');
 
+    //* Экран Списка Мест
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: toolbarH,
@@ -193,18 +197,14 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
             .animate(
               delay: 2.seconds,
             )
-            .fadeIn(
-              duration: 2.seconds,
-            )
-            .slideY(
-              begin: .5,
-            ));
+            .fadeIn(duration: 2.seconds)
+            .slideY(begin: .5));
   }
 }
 
 /// ВИДЖЕТЫ
 ///
-//* _MainContent_ ------------------------
+/// _MainContent_ ------------------------
 class MainContent extends ConsumerWidget {
   const MainContent({
     super.key,

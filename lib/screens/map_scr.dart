@@ -24,9 +24,9 @@ class MapScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
+          title: Text(
             'Выбрать Место',
-            style: TextStyle(fontSize: 30),
+            style: TextStyle(fontSize: toolbarH * .4),
           ),
           toolbarHeight: toolbarH,
           leading: BackButton(
@@ -72,7 +72,7 @@ class OnMapAddressView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final cScheme = Theme.of(context).colorScheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
     final String address = ref.watch(addressProvider);
     final AsyncValue<String> streamAddress = ref.watch(streamAddressProvider);
     final String startPointAddress = ref.watch(startPointProvider).address;
@@ -92,25 +92,23 @@ class OnMapAddressView extends ConsumerWidget {
               size: 30,
             ),
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                child: Padding(
+                    padding: const EdgeInsets.all(8.0),
 
-                /// Стрим получения адреса после подтверждения
-                child: streamAddress.when(
-                  data: (address) => Text(
-                    isGettingAddress ? address : startPointAddress,
-                    style: TextStyle(
-                      color: cScheme.tertiary,
-                      fontSize: 14,
-                    ),
-                  ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => Text(address),
-                ),
-              ),
-            ),
+                    //` Стрим получения адреса после подтверждения
+                    child: streamAddress.when(
+                      data: (address) => Text(
+                        isGettingAddress ? address : startPointAddress,
+                        style: TextStyle(
+                          color: cScheme.tertiary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, st) => Text(address),
+                    ))),
 
-            /// Мигающая кнопка сохранения
+            //` Мигающая кнопка сохранения
             Visibility(
                 visible: isGettingAddress ? true : false,
                 child: IconButton(
@@ -138,8 +136,7 @@ class OnMapAddressView extends ConsumerWidget {
                       if (isCreatingLocation) {
                         Navigator.of(context).pop(pickedLocation);
                       } else {
-                        /// Отправляем новую локацию в БД
-                        Navigator.of(context).pop();
+                        //` Обновляем локацию в БД
                         if (address.isNotEmpty && currentDate.isNotEmpty) {
                           await ref.read(userPlacesProvider.notifier).updateLocation(
                                 pickedLocation.latitude.toString(),
@@ -148,10 +145,10 @@ class OnMapAddressView extends ConsumerWidget {
                                 currentDate,
                               );
                         }
+                        if (context.mounted) Navigator.of(context).pop();
                       }
                       ref.invalidate(startPointProvider);
                       ref.read(onGetAddressProvider.notifier).state = false;
-                      // ref.invalidate(addressProvider);
                     }))
           ],
         ));

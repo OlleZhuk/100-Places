@@ -41,7 +41,7 @@ final theme = ThemeData.dark().copyWith(
         bodySmall: TextStyle(
           fontFamily: 'AlumniSans',
           fontSize: 18,
-          color: colorScheme.primary.withOpacity(.6),
+          color: colorScheme.primary.withOpacity(.75),
         ),
         //^ текст экрана
         bodyMedium: TextStyle(
