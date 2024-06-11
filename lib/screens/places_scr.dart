@@ -35,7 +35,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 
   @override
   Widget build(context) {
-    List<Place> userPlaces = ref.watch(userPlacesProvider);
+    final List<Place> userPlaces = ref.watch(userPlacesProvider);
     final double toolbarH = MediaQuery.sizeOf(context).height * .1;
     final TextTheme tTheme = Theme.of(context).textTheme;
     final ColorScheme cScheme = Theme.of(context).colorScheme;
@@ -96,6 +96,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                     Flexible(child: Text('Очистить коллекцию')),
                   ],
                 ).animate().flipH(duration: 300.ms),
+                //
                 onTap: () => showDialog(
                     context: context,
                     builder: (context) => ConfirmAlert(
