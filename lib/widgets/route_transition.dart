@@ -30,7 +30,6 @@ class MyRouteTransition extends PageRouteBuilder {
             return SlideTransition(
               position: offset,
               child: FadeTransition(
-                // alwaysIncludeSemantics: true,
                 opacity: animation,
                 child: child,
               ),

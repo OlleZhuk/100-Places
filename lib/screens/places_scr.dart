@@ -101,8 +101,8 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                     builder: (context) => ConfirmAlert(
                         question: 'Удалить сразу все Места?',
                         event: () async {
-                          Navigator.of(context).pop();
                           await ref.read(userPlacesProvider.notifier).clearDB();
+                          if (context.mounted) Navigator.of(context).pop();
                         })),
               ),
               PopupMenuItem(
@@ -126,14 +126,14 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         Icon(
           Icons.local_see_rounded,
           color: cScheme.primary,
-          size: toolbarH * .42,
+          size: toolbarH * .5,
         ),
         const Gap(12),
         //< 100 >
         Text(
           '100',
           style: tTheme.titleLarge!.copyWith(
-            fontSize: toolbarH * .4,
+            fontSize: toolbarH * .5,
           ),
         ),
         const Gap(4),
@@ -149,7 +149,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
             //
             child: Text('Мест',
                 style: tTheme.titleLarge!.copyWith(
-                  fontSize: toolbarH * .4,
+                  fontSize: toolbarH * .5,
                   fontWeight: FontWeight.w600,
                 )))
       ],
@@ -158,7 +158,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
     // print('=== МСБ ЭСМ!!! ===');
     // print('=== $horPadds ===');
 
-    //* Экран Списка Мест
+    //| Экран Списка Мест
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: toolbarH,
@@ -202,9 +202,9 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   }
 }
 
-/// ВИДЖЕТЫ
-///
-/// _MainContent_ ------------------------
+//| ВИДЖЕТЫ:                             >
+//
+//| _MainContent_ ------------------------
 class MainContent extends ConsumerWidget {
   const MainContent({
     super.key,
@@ -215,17 +215,17 @@ class MainContent extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    final userPlaces = ref.watch(userPlacesProvider);
-    final scrollController = ScrollController();
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final imageWidth = deviceWidth * .42;
-    final offsetX = imageWidth * .92; //0.3864
-    final offsetY = imageWidth * .8; //0.336
-    final maxCAE = deviceWidth * .51;
-    final cScheme = Theme.of(context).colorScheme;
-    final tTheme = Theme.of(context).textTheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    final double deviceWidth = MediaQuery.sizeOf(context).width;
+    final List<Place> userPlaces = ref.watch(userPlacesProvider);
+    final ScrollController scrollController = ScrollController();
+    final double imageWidth = deviceWidth * .42;
+    final double offsetX = imageWidth * .92; //0.3864
+    final double offsetY = imageWidth * .8; //0.336
+    final double maxCAE = deviceWidth * .51;
 
-    /// Варианты сортировки
+    //^ Варианты сортировки
     switch (sortCase) {
       case "AZ":
         userPlaces.sort((a, b) => a.title.compareTo(b.title));
@@ -244,9 +244,9 @@ class MainContent extends ConsumerWidget {
         break;
     }
 
-    print('=== МСБ MainContent ЭСМ!!! ===');
+    // print('=== МСБ MainContent ЭСМ!!! ===');
 
-    /// Сетка картинок и скролл-бар
+    //^ Сетка картинок и скролл-бар
     return Scrollbar(
         controller: scrollController,
         child: GridView.builder(

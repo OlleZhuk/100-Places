@@ -33,9 +33,6 @@ class PlaceDetailScreen extends ConsumerWidget {
     final double toolbarH = MediaQuery.sizeOf(context).height * .1;
     final String currentDate = place.date;
     final PlaceLocation currentLocation = place.location;
-    final String title = ref.watch(titleProvider);
-    final bool isEdit = ref.watch(isEditTitleProvider);
-    final String address = ref.watch(addressProvider);
 
     //* Метод редакции названия
     Future<void> editTitle() async {
@@ -94,9 +91,9 @@ class PlaceDetailScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.all(
                         Radius.circular(10),
                       ))))),
-          actionsPadding: const EdgeInsets.only(
+          actionsPadding: EdgeInsets.only(
             right: 24,
-            bottom: 16,
+            bottom: MediaQuery.viewInsetsOf(context).bottom * 1.1,
           ),
           //
           actions: [
@@ -222,17 +219,23 @@ class PlaceDetailScreen extends ConsumerWidget {
 
     //* Метод обнуления поставщиков кнопкой/жестом "Назад"
     Future<bool> backGesture() async {
-      if (title.isNotEmpty) ref.read(titleProvider.notifier).state = '';
-      if (isEdit) ref.read(isEditTitleProvider.notifier).state = false;
-      if (address.isNotEmpty) ref.invalidate(addressProvider);
-      // Navigator.of(context).pop();
+      ref.read(titleProvider.notifier).state = '';
+      ref.read(isEditTitleProvider.notifier).state = false;
+      ref.invalidate(addressProvider);
+
       return true;
     }
 
     // print('=== МСБ ЭИМ!!! ===');
 
-    //* Экран Детальной Информации
+    /// Экран Детальной Информации
     return WillPopScope(
+      /*
+      Возвраты к предыдущему экрану, требующие 
+      инициализации провайдеров:
+        - кнопка _BackButton_ панели приложения
+        - жест экрана (кн. НАЗАД) устройства
+      */
       onWillPop: backGesture,
       child: Scaffold(
         appBar: AppBar(
@@ -242,9 +245,9 @@ class PlaceDetailScreen extends ConsumerWidget {
           toolbarHeight: toolbarH,
           leading: BackButton(
             onPressed: () {
-              if (title.isNotEmpty) ref.read(titleProvider.notifier).state = '';
-              if (isEdit) ref.read(isEditTitleProvider.notifier).state = false;
-              if (address.isNotEmpty) ref.invalidate(addressProvider);
+              ref.read(titleProvider.notifier).state = '';
+              ref.read(isEditTitleProvider.notifier).state = false;
+              ref.invalidate(addressProvider);
               Navigator.of(context).pop();
             },
           ),
@@ -292,7 +295,8 @@ class TitleView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final double fontSz = MediaQuery.sizeOf(context).height * .043;
+    final double fontSz = MediaQuery.sizeOf(context).height;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     final bool isEditTitle = ref.watch(isEditTitleProvider);
     final String currentTitle = currentPlace.title;
     final String newTitle = ref.watch(titleProvider);
@@ -314,7 +318,7 @@ class TitleView extends ConsumerWidget {
         maxLines: 2,
         style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: Theme.of(context).colorScheme.primary,
-              fontSize: fontSz,
+              fontSize: orientation == Orientation.portrait ? fontSz * .043 : fontSz * .063,
               height: .9,
             ),
       ).animate(delay: 1.seconds).shakeX(duration: 200.ms),

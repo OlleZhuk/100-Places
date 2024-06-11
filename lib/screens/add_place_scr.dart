@@ -26,6 +26,9 @@ class AddPlaceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final titleController = TextEditingController();
+
+    final Orientation orientation = MediaQuery.orientationOf(context);
     final double toolbarH = MediaQuery.sizeOf(context).height * .1;
     final ColorScheme cScheme = Theme.of(context).colorScheme;
     final TextTheme tTheme = Theme.of(context).textTheme;
@@ -62,180 +65,208 @@ class AddPlaceScreen extends ConsumerWidget {
             pickedLocation,
           );
 
-      ref.read(isCreatingLocationProvider.notifier).state = false;
-      ref.invalidate(isEditTitleProvider);
+      ///
       ref.read(titleProvider.notifier).state = '';
       ref.read(imageFileProvider.notifier).state = null;
-      ref.invalidate(addressProvider);
-      ref.invalidate(locationProvider);
+      ref.read(isCreatingLocationProvider.notifier).state = false;
+
+      ref.read(selectedSourseProvider.notifier).state = '';
+      ref.read(manualAddressProvider.notifier).state = '';
       ref.invalidate(pickedLocationProvider);
       ref.invalidate(pickedLocationStreamAddressProvider);
-      ref.invalidate(manualAddressProvider);
-      ref.invalidate(selectedSourseProvider);
+      ref.invalidate(locationProvider);
+      ref.invalidate(addressProvider);
 
       if (context.mounted) Navigator.of(context).pop();
     }
 
     //* Метод добавления названия
     Future<void> enterTitle() async {
-      final titleController = TextEditingController();
-
       await showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          backgroundColor: cScheme.background.withOpacity(.4),
-          content: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              //
-              child: TextField(
-                  controller: titleController,
-                  autofocus: true,
-                  maxLength: 35,
-                  keyboardType: TextInputType.text,
-                  textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (value) {
-                    if (value.isEmpty) return;
-                    ref.read(titleProvider.notifier).state = value;
-                    Navigator.of(context).pop();
-                  },
-                  style: tTheme.headlineSmall!.copyWith(
-                    color: cScheme.primary,
+        builder: (context) => SingleChildScrollView(
+          child: AlertDialog(
+            backgroundColor: cScheme.background.withOpacity(.4),
+            actionsAlignment: MainAxisAlignment.center,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            content: Padding(
+                padding: const EdgeInsets.only(top: 5),
+                //
+                child: TextField(
+                    controller: titleController,
+                    autofocus: true,
+                    maxLength: 35,
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.sentences,
+                    onSubmitted: (value) {
+                      if (value.isEmpty) return;
+                      ref.read(titleProvider.notifier).state = value;
+                      Navigator.of(context).pop();
+                    },
+                    style: tTheme.headlineSmall!.copyWith(
+                      color: cScheme.primary,
+                    ),
+                    decoration: InputDecoration(
+                        labelText: 'Название Места:',
+                        labelStyle: TextStyle(color: cScheme.tertiary),
+                        hintStyle: TextStyle(
+                          color: cScheme.onSecondaryContainer.withOpacity(.3),
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () => titleController.clear(),
+                          icon: const Icon(Icons.clear),
+                        ),
+                        counterStyle: TextStyle(color: cScheme.primary),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(10),
+                            ),
+                            borderSide: BorderSide(
+                              width: 1.5,
+                              color: cScheme.primary.withOpacity(0.2),
+                            )),
+                        border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ))))),
+            actions: [
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: cScheme.onPrimary),
+                onPressed: () {
+                  final enteredTitle = titleController.text;
+                  if (enteredTitle.isEmpty) return;
+                  ref.read(titleProvider.notifier).state = enteredTitle;
+                  Navigator.of(context).pop();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 48.0),
+                  child: Text(
+                    "ДА",
+                    style: TextStyle(color: cScheme.primary),
                   ),
-                  decoration: InputDecoration(
-                      labelText: 'Название Места:',
-                      labelStyle: TextStyle(color: cScheme.tertiary),
-                      hintStyle: TextStyle(
-                        color: cScheme.onSecondaryContainer.withOpacity(.3),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () => titleController.clear(),
-                        icon: const Icon(Icons.clear),
-                      ),
-                      counterStyle: TextStyle(color: cScheme.primary),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10),
-                          ),
-                          borderSide: BorderSide(
-                            width: 1.5,
-                            color: cScheme.primary.withOpacity(0.2),
-                          )),
-                      border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ))))),
-          actionsPadding: const EdgeInsets.only(
-            right: 24,
-            bottom: 16,
-          ),
-          //
-          actions: [
-            ElevatedButton(
-              child: const Text("ДА"),
-              onPressed: () {
-                final enteredTitle = titleController.text;
-                if (enteredTitle.isEmpty) return;
+                ),
+              )
+            ],
+          ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
+                curve: Curves.easeOutBack,
+              ),
+        ),
+      );
+    }
 
-                ref.read(titleProvider.notifier).state = enteredTitle;
+    //* Метод обнуления поставщиков кнопкой/жестом "Назад"
+    Future<bool> backGesture() async {
+      ref.read(titleProvider.notifier).state = '';
+      ref.read(imageFileProvider.notifier).state = null;
+      ref.read(isCreatingLocationProvider.notifier).state = false;
+      ref.read(selectedSourseProvider.notifier).state = '';
+      ref.read(manualAddressProvider.notifier).state = '';
+      ref.invalidate(pickedLocationProvider);
+      ref.invalidate(pickedLocationStreamAddressProvider);
+      ref.invalidate(locationProvider);
+      ref.invalidate(addressProvider);
+      return true;
+    }
+
+    // print('===> МСБ ЭДМ!!! ===');
+
+    /// Экран Добавления Места
+    return WillPopScope(
+      /*
+      Возвраты к предыдущему экрану, требующие 
+      инициализации провайдеров:
+        - кнопка СОХРАНИТЬ (метод _savePlace_)
+        - кнопка _BackButton_ панели приложений
+        - жест экрана (кн. НАЗАД) устройства
+      */
+      onWillPop: backGesture,
+      child: Scaffold(
+        appBar: AppBar(
+            toolbarHeight: toolbarH,
+            title: Text(
+              'Новое Место:',
+              style: TextStyle(
+                fontSize: orientation == Orientation.portrait ? toolbarH * .4 : toolbarH * .7,
+              ),
+            ),
+            leading: BackButton(
+              onPressed: () {
+                ref.read(titleProvider.notifier).state = '';
+                ref.read(imageFileProvider.notifier).state = null;
+                ref.read(isCreatingLocationProvider.notifier).state = false;
+                ref.read(selectedSourseProvider.notifier).state = '';
+                ref.read(manualAddressProvider.notifier).state = '';
+                ref.invalidate(pickedLocationProvider);
+                ref.invalidate(pickedLocationStreamAddressProvider);
+                ref.invalidate(locationProvider);
+                ref.invalidate(addressProvider);
 
                 Navigator.of(context).pop();
               },
-            ),
-          ],
-        ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
-              curve: Curves.easeOutBack,
-            ),
-      );
-    }
-    // print('===> МСБ ЭДМ!!! ===');
+            )),
+        body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: SingleChildScrollView(
+                child: Column(
+              children: [
+                //` Фоновая картинка
+                Image.asset('assets/images/landscape.webp'),
+                //
+                //` Название Места
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(
+                        color: cScheme.primary.withOpacity(.2),
+                        width: 1.6,
+                      )),
+                  child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      child: InkWell(
+                          onTap: enterTitle,
+                          child: enteredTitle.isEmpty
+                              ? Text(
+                                  'Добавьте название.',
+                                  style: tTheme.bodySmall,
+                                )
+                              : Text(
+                                  enteredTitle,
+                                  style: tTheme.titleMedium,
+                                ))),
+                ),
+                const Gap(gapV),
+                //
+                //` Изображение Места
+                const ImageInput(iconSz: iconSize),
+                const Gap(gapV),
+                //
+                //` Местоположение
+                const LocationInput(iconSz: iconSize),
+                const Gap(gapV * 10),
+              ],
+            ))),
 
-    //* Экран Добавления Места
-    return Scaffold(
-      appBar: AppBar(
-          toolbarHeight: toolbarH,
-          title: Text(
-            'Новое Место:',
-            style: TextStyle(fontSize: toolbarH * .4),
-          ),
-          leading: BackButton(
-            onPressed: () {
-              ref.invalidate(addressProvider);
-              ref.invalidate(locationProvider);
-              ref.invalidate(pickedLocationProvider);
-              ref.invalidate(pickedLocationStreamAddressProvider);
-              ref.invalidate(manualAddressProvider);
-              ref.invalidate(selectedSourseProvider);
-              ref.read(titleProvider.notifier).state = '';
-              ref.invalidate(isEditTitleProvider);
-              ref.read(imageFileProvider.notifier).state = null;
-              ref.read(isCreatingLocationProvider.notifier).state = false;
-
-              Navigator.of(context).pop();
-            },
-          )),
-      body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: SingleChildScrollView(
-              child: Column(
-            children: [
-              //< Фоновая картинка
-              Image.asset('assets/images/landscape.webp'),
-              //
-              //< Название Места
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    border: Border.all(
-                      color: cScheme.primary.withOpacity(.2),
-                      width: 1.6,
-                    )),
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: InkWell(
-                        onTap: enterTitle,
-                        child: enteredTitle.isEmpty
-                            ? Text(
-                                'Добавьте название.',
-                                style: tTheme.bodySmall,
-                              )
-                            : Text(
-                                enteredTitle,
-                                style: tTheme.titleMedium,
-                              ))),
-              ),
-              const Gap(gapV),
-              //
-              //< Изображение Места
-              const ImageInput(iconSz: iconSize),
-              const Gap(gapV),
-              //
-              //< Местоположение
-              const LocationInput(iconSz: iconSize),
-              const Gap(gapV * 10),
-            ],
-          ))),
-
-      /// КНОПКА "СОХРАНИТЬ"
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: CustomFAB(
-        labelText: 'Сохранить',
-        buttonIcon: Icons.save_alt,
-        action: savePlace,
+        //^ КНОПКА "СОХРАНИТЬ"
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: CustomFAB(
+          labelText: 'Сохранить',
+          buttonIcon: Icons.save_alt,
+          action: savePlace,
+        ),
       ),
     );
   }
 }
 
-/// ВИДЖЕТЫ:
+//| ВИДЖЕТЫ:                             >
 
-/// _ImageInput_ ------------------------
+//| _ImageInput_ -------------------------
 class ImageInput extends ConsumerWidget {
   const ImageInput({
     super.key,
@@ -272,7 +303,7 @@ class ImageInput extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         //
-        //` Бокс для изображения
+        //< Бокс для изображения >
         Container(
           width: deviceWidth * .5,
           height: deviceWidth * .5,
@@ -307,9 +338,10 @@ class ImageInput extends ConsumerWidget {
         ),
         const Gap(gap * 2.1),
 
-        //` Выбор источника
+        //< Выбор источника >
         Column(
           children: [
+            //| Снимок
             InkWell(
               onTap: () {
                 isCamera = true;
@@ -325,6 +357,7 @@ class ImageInput extends ConsumerWidget {
               ),
             ),
             const Gap(gap * 2.5),
+            //| Галерея
             InkWell(
                 onTap: () {
                   isCamera = false;
@@ -344,7 +377,7 @@ class ImageInput extends ConsumerWidget {
   }
 }
 
-/// _LocationInput_ --------------------------------
+//| _LocationInput_ ----------------------
 class LocationInput extends ConsumerWidget {
   const LocationInput({
     super.key,
@@ -360,9 +393,9 @@ class LocationInput extends ConsumerWidget {
     final TextTheme tTheme = Theme.of(context).textTheme;
     final ColorScheme cScheme = Theme.of(context).colorScheme;
     final bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
-
     final String pickedLocationAddress = ref.watch(pickedLocationProvider).address;
     final AsyncValue<String> pickedLocationStreamAddress = ref.watch(pickedLocationStreamAddressProvider);
+
     final double lat = ref.watch(pickedLocationProvider).latitude;
     final double lng = ref.watch(pickedLocationProvider).longitude;
 
@@ -407,7 +440,7 @@ class LocationInput extends ConsumerWidget {
       /// 4. Запись модели локации в поставщик локации
       if (pickedLocation != null) {
         ref.read(pickedLocationProvider.notifier).state = pickedLocation!;
-        ref.read(selectedSourseProvider.notifier).state = 'geo';
+        ref.read(selectedSourseProvider.notifier).state = 'geo'; //!
       }
 
       // print('=== ФЛАГ СОЗДАНИЯ ЛОКАЦИИ: ${ref.watch(isCreatingLocationProvider).toString()}');
@@ -540,7 +573,7 @@ class LocationInput extends ConsumerWidget {
     return Column(
       children: [
         //
-        //< Бокс с адресом местоположения
+        //< Бокс с адресом местоположения >
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -582,16 +615,16 @@ class LocationInput extends ConsumerWidget {
         ),
         const Gap(gap / 2),
 
-        //< Кнопки выбора местоположения
+        //< Кнопки выбора местоположения >
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             //
-            //* Текущее
+            //| Текущее
             InkWell(
                 onTap: () {
                   if (selectedSourse == 'man') {
-                    ref.read(selectedSourseProvider.notifier).state = 'geo';
+                    ref.read(selectedSourseProvider.notifier).state = 'geo'; //!
                   }
                   getUserLocation();
                 },
@@ -603,12 +636,12 @@ class LocationInput extends ConsumerWidget {
                 )),
             const Gap(gap),
 
-            //* На карте
+            //| На карте
             InkWell(
                 onTap: () {
                   // ref.invalidate(pickedLocationStreamAddressProvider);
                   if (selectedSourse == 'man') {
-                    ref.read(selectedSourseProvider.notifier).state = 'geo';
+                    ref.read(selectedSourseProvider.notifier).state = 'geo'; //!
                   }
                   getOnMapLocation();
                 },
@@ -619,7 +652,7 @@ class LocationInput extends ConsumerWidget {
                   ],
                 )),
 
-            //* Вручную
+            //| Вручную
             Visibility(
               visible: isCreatingLocation && lat != 0 && lng != 0,
               child: const Gap(gap),
@@ -652,7 +685,7 @@ class LocationInput extends ConsumerWidget {
   }
 }
 
-/// _CustomClipPath_ ------------------------------
+//| _CustomClipPath_ ---------------------
 class CustomClipPath extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

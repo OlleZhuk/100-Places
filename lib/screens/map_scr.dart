@@ -17,56 +17,83 @@ class MapScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    // Point? pickedLocation;
     final toolbarH = MediaQuery.sizeOf(context).height * .1;
+    final Orientation orientation = MediaQuery.orientationOf(context);
 
-    print('=== МСБ ЭК!!! ===');
+    //* Метод обнуления поставщиков физической кнопкой/жестом "Назад"
+    Future<bool> backGesture() async {
+      //` Возврат на ЭДМ без сохранения введённых/полученных данных
+      ref.invalidate(addressProvider);
+      ref.invalidate(locationProvider);
+      ref.read(onGetAddressProvider.notifier).state = false;
 
-    return Scaffold(
-      appBar: AppBar(
-          title: Text(
-            'Выбрать Место',
-            style: TextStyle(fontSize: toolbarH * .4),
-          ),
-          toolbarHeight: toolbarH,
-          leading: BackButton(
-            onPressed: () {
-              ref.invalidate(addressProvider);
-              ref.invalidate(startPointProvider);
-              // ref.invalidate(streamAddressProvider);
-              // ???
-              ref.invalidate(locationProvider);
-              // ???
-              ref.read(onGetAddressProvider.notifier).state = false;
-              Navigator.of(context).pop();
-            },
-          )),
-      //
-      body: const SafeArea(child: YanMapLocation()),
+      return true;
+    }
 
-      //^ Кнопка
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: CustomFAB(
-          labelText: 'Получить адрес',
-          buttonIcon: Icons.not_listed_location,
-          action: () async {
-            Point? pickedLocation = ref.watch(locationProvider);
-            ref.read(onGetAddressProvider.notifier).state = true;
-            await ref.read(addressProvider.notifier).getAddress(
-                  pickedLocation!.latitude,
-                  pickedLocation.longitude,
-                );
-          }),
+    // print('=== МСБ ЭК!!! ===');
 
-      /// Отображение адреса
-      bottomNavigationBar: const OnMapAddressView(),
+    return WillPopScope(
+      /*
+      Возвраты к предыдущему экрану, требующие инициализации 
+      провайдеров:
+        - мигающая кнопка с иконкой сохранения
+        - кнопка _BackButton_ панели приложений
+        - жест экрана (кн. НАЗАД) устройства
+
+      При этом возвраты без сохранения (2 и 3) предполагают 
+      инициализацию всех задействованных провайдеров (ref.read...), 
+      тогда как сохранение с возвратом (1) не сбрасывает 
+      провайдеры, данные которых используются на предыдущем
+      экране.
+      */
+      onWillPop: backGesture,
+      child: Scaffold(
+        appBar: AppBar(
+            title: Text(
+              'Выбрать Место',
+              style: TextStyle(
+                fontSize: orientation == Orientation.portrait ? toolbarH * .4 : toolbarH * .7,
+              ),
+            ),
+            toolbarHeight: toolbarH,
+            leading: BackButton(
+              onPressed: () {
+                //` Возврат на ЭДМ без сохранения введённых/полученных данных
+                ref.invalidate(addressProvider);
+                ref.invalidate(locationProvider);
+                ref.read(onGetAddressProvider.notifier).state = false;
+
+                Navigator.of(context).pop();
+              },
+            )),
+        //
+        body: const SafeArea(child: YanMapLocation()),
+
+        //^ Кнопка ПОЛУЧИТЬ АДРЕС
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: CustomFAB(
+            labelText: 'Получить адрес',
+            buttonIcon: Icons.not_listed_location,
+            action: () async {
+              Point? pickedLocation = ref.watch(locationProvider);
+              ref.read(onGetAddressProvider.notifier).state = true;
+
+              await ref.read(addressProvider.notifier).getAddress(
+                    pickedLocation!.latitude,
+                    pickedLocation.longitude,
+                  );
+            }),
+
+        //^ Отображение адреса
+        bottomNavigationBar: const OnMapAddressView(),
+      ),
     );
   }
 }
 
-/// ВИДЖЕТЫ
-///
-/// Виджет отображения адреса
+//| ВИДЖЕТЫ:                                   >
+//
+//| Виджет отображения адреса
 class OnMapAddressView extends ConsumerWidget {
   const OnMapAddressView({super.key});
 
@@ -79,7 +106,7 @@ class OnMapAddressView extends ConsumerWidget {
     final bool isGettingAddress = ref.watch(onGetAddressProvider);
     final String currentDate = ref.watch(dateProvider);
 
-    print('=== МСБ OnMapAddressView!!! ===');
+    // print('=== МСБ OnMapAddressView!!! ===');
 
     return Card(
         color: Colors.transparent,
@@ -136,7 +163,7 @@ class OnMapAddressView extends ConsumerWidget {
                       if (isCreatingLocation) {
                         Navigator.of(context).pop(pickedLocation);
                       } else {
-                        //` Обновляем локацию в БД
+                        //` Обновляем данные о локации в БД
                         if (address.isNotEmpty && currentDate.isNotEmpty) {
                           await ref.read(userPlacesProvider.notifier).updateLocation(
                                 pickedLocation.latitude.toString(),
@@ -145,17 +172,22 @@ class OnMapAddressView extends ConsumerWidget {
                                 currentDate,
                               );
                         }
+
                         if (context.mounted) Navigator.of(context).pop();
                       }
-                      ref.invalidate(startPointProvider);
+                      //` Инициализация провайдеров
                       ref.read(onGetAddressProvider.notifier).state = false;
+                      /*
+                      При сохранении не обнуляются _addressProvider_  
+                      и _locationProvider_, т.к. дальше их данные нужны на ЭДМ
+                      */
                     }))
           ],
         ));
   }
 }
 
-/// Виджет Яндекс Карты
+//| Виджет Яндекс.Карт
 class YanMapLocation extends ConsumerStatefulWidget {
   const YanMapLocation({super.key});
 
@@ -207,7 +239,6 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
           await controller.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
             target: placemarkMapObject.point,
             zoom: isCreatingLocation ? 6 : 16,
-            // zoom: !isEditLocation ? 6 : 16,
           )));
         },
         //
@@ -232,7 +263,7 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
           });
           ref.read(locationProvider.notifier).state = pickedLoc!;
           //
-          print('${pickedLoc!.latitude}, ${pickedLoc!.longitude}');
+          // print('${pickedLoc!.latitude}, ${pickedLoc!.longitude}');
         },
       );
 }
