@@ -1,3 +1,6 @@
+/// Поставщики координат
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
@@ -29,7 +32,7 @@ final locationProvider = StateProvider<Point>(
   (ref) => const Point(latitude: 0, longitude: 0),
 );
 
-//* Поставщик стрима для отображения адреса на экране добавления Места
+//* Поставщик стрима для отображения адреса на Экране добавления Места
 final pickedLocationStreamAddressProvider = StreamProvider<String>((ref) {
   String pickedLocationAddress = ref.watch(pickedLocationProvider).address;
   return Stream.value(pickedLocationAddress);

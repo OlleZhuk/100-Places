@@ -26,7 +26,7 @@ class GetAddress extends StateNotifier<String> {
     const err403 = '⛔АДРЕС НЕ ПОЛУЧЕН!\n'
         'Исчерпан ежедневный лимит на выдачу адресов. Пожалуйста, введите адрес вручную или повторите попытку завтра.';
     const noInternet = '⛔АДРЕС НЕ ПОЛУЧЕН!\n'
-        'Проверьте соединение с интернетом!';
+        'Нет соединения с интернетом!';
 
     try {
       final GeocodeResponse gettingAddress = await geo.getGeocode(

@@ -85,6 +85,7 @@ class AddPlaceScreen extends ConsumerWidget {
       await showDialog(
         context: context,
         builder: (context) => SingleChildScrollView(
+          reverse: true,
           child: AlertDialog(
             backgroundColor: cScheme.background.withOpacity(.4),
             actionsAlignment: MainAxisAlignment.center,

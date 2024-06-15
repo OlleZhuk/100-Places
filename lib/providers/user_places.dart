@@ -23,30 +23,29 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     File image,
     PlaceLocation location,
   ) async {
-    // print(' НА ВХОДЕ ПРОВАЙДЕРА: ${location.address}');
     var getDate = DateTime.now().toString();
 
-    /// Открываем базу
+    /// Открыть базу
     final db = await getDatabase();
 
-    /// Задаем путь сохранения
+    /// Задать путь сохранения
     final appDir = await syspaths.getApplicationDocumentsDirectory();
-    // final extDir = await syspaths.getExternalStorageDirectory();
 
-    /// Базовое имя файла
+    /// Задать базовое имя файла
     final filename = path.basename(image.path);
 
-    /// Копируем изображение, чтобы поместить его в каталог
+    /// Скопировать изображение, чтобы поместить его в каталог
     final copiedImage = await image.copy('${appDir.path}/$filename');
 
-    ///
-    final newPlace = Place(
+    /// Задать модель нового Места
+    final Place newPlace = Place(
       title: title,
       date: getDate,
       image: copiedImage,
       location: location,
     );
 
+    /// Записать в БД все данные по новому месту
     db.insert('best_places', {
       'title': newPlace.title,
       'date': newPlace.date,
@@ -88,11 +87,8 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     } on Exception {
       print('======== $onError');
     }
-    // await db.execute("delete from user_places");
-    // await db.close();
     result = await getData();
     state = result;
-// state = List.empty();
   }
 
   //* Метод редакции названия
@@ -177,11 +173,13 @@ Future<List<Place>> getData() async {
 //* Инициализация БД
 Future<Database> getDatabase() async {
   final dbPath = await sql.getDatabasesPath();
-  // print('DB Path ======>> $dbPath');
+  print('DB Path ======>> $dbPath');
   /*
   /data/user/0/com.example.favorite_places_13/databases
   */
-  // Directory? extDir = await syspaths.getExternalStorageDirectory();
+  Directory? extDir = await syspaths.getExternalStorageDirectory();
+  print('DB extDir ======>> $extDir');
+
   /*
   /storage/emulated/0/Android/data/com.example.favorite_places_13/files
   */

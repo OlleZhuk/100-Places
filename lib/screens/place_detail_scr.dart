@@ -39,86 +39,84 @@ class PlaceDetailScreen extends ConsumerWidget {
       final titleController = TextEditingController();
 
       await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          backgroundColor: cScheme.background.withOpacity(.4),
-          content: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              //
-              child: TextField(
-                  controller: titleController,
-                  autofocus: true,
-                  maxLength: 35,
-                  keyboardType: TextInputType.text,
-                  textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (value) async {
-                    ref.read(isEditTitleProvider.notifier).state = true;
-                    if (value.isEmpty) return;
-                    ref.read(titleProvider.notifier).state = value;
-
-                    await ref.read(userPlacesProvider.notifier).updateTitle(
-                          value, // title
-                          place.date, // date
-                        );
-                    if (context.mounted) Navigator.of(context).pop();
-                  },
-                  style: tTheme.headlineSmall!.copyWith(
-                    color: cScheme.primary,
+          context: context,
+          builder: (context) => SingleChildScrollView(
+                reverse: true,
+                child: AlertDialog(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
-                  decoration: InputDecoration(
-                      labelText: 'Новое название:',
-                      labelStyle: TextStyle(color: cScheme.tertiary),
-                      hintStyle: TextStyle(
-                        color: cScheme.onSecondaryContainer.withOpacity(.3),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () => titleController.clear(),
-                        icon: const Icon(Icons.clear),
-                      ),
-                      counterStyle: TextStyle(color: cScheme.primary),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10),
+                  backgroundColor: cScheme.background.withOpacity(.4),
+                  content: Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: TextField(
+                          controller: titleController,
+                          autofocus: true,
+                          maxLength: 35,
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.sentences,
+                          onSubmitted: (value) async {
+                            ref.read(isEditTitleProvider.notifier).state = true;
+                            if (value.isEmpty) return;
+                            ref.read(titleProvider.notifier).state = value;
+
+                            await ref.read(userPlacesProvider.notifier).updateTitle(
+                                  value, // title
+                                  place.date, // date
+                                );
+                            if (context.mounted) Navigator.of(context).pop();
+                          },
+                          style: tTheme.headlineSmall!.copyWith(
+                            color: cScheme.primary,
                           ),
-                          borderSide: BorderSide(
-                            width: 1.5,
-                            color: cScheme.primary.withOpacity(0.2),
-                          )),
-                      border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ))))),
-          actionsPadding: EdgeInsets.only(
-            right: 24,
-            bottom: MediaQuery.viewInsetsOf(context).bottom * 1.1,
-          ),
-          //
-          actions: [
-            ElevatedButton(
-              child: const Text("Подтвердить"),
-              onPressed: () async {
-                ref.read(isEditTitleProvider.notifier).state = true;
-                final enteredTitle = titleController.text;
-                if (enteredTitle.isEmpty) return;
-                ref.read(titleProvider.notifier).state = enteredTitle;
+                          decoration: InputDecoration(
+                              labelText: 'Новое название:',
+                              labelStyle: TextStyle(color: cScheme.tertiary),
+                              hintStyle: TextStyle(
+                                color: cScheme.onSecondaryContainer.withOpacity(.3),
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: () => titleController.clear(),
+                                icon: const Icon(Icons.clear),
+                              ),
+                              counterStyle: TextStyle(color: cScheme.primary),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(10),
+                                  ),
+                                  borderSide: BorderSide(
+                                    width: 1.5,
+                                    color: cScheme.primary.withOpacity(0.2),
+                                  )),
+                              border: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ))))),
+                  actionsPadding: const EdgeInsets.only(right: 24),
+                  //
+                  actions: [
+                    ElevatedButton(
+                      child: const Text("Подтвердить"),
+                      onPressed: () async {
+                        ref.read(isEditTitleProvider.notifier).state = true;
+                        final enteredTitle = titleController.text;
+                        if (enteredTitle.isEmpty) return;
+                        ref.read(titleProvider.notifier).state = enteredTitle;
 
-                await ref.read(userPlacesProvider.notifier).updateTitle(
-                      enteredTitle, // title
-                      place.date, // date
-                    );
+                        await ref.read(userPlacesProvider.notifier).updateTitle(
+                              enteredTitle, // title
+                              place.date, // date
+                            );
 
-                // ref.read(isEditTitleProvider.notifier).state = false;
-                if (context.mounted) Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
-              curve: Curves.easeOutBack,
-            ),
-      );
+                        // ref.read(isEditTitleProvider.notifier).state = false;
+                        if (context.mounted) Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
+                      curve: Curves.easeOutBack,
+                    ),
+              ));
     }
 
     //* Метод редакции местоположения

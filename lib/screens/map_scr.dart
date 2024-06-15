@@ -1,7 +1,6 @@
 /// ЭКРАН КАРТЫ
 library;
 
-import 'package:favorite_places_13/providers/user_places.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +9,7 @@ import 'package:yandex_mapkit/yandex_mapkit.dart';
 import '/providers/any_states.dart';
 import '/providers/any_locations.dart';
 import '/providers/geocoder.dart';
+import '/providers/user_places.dart';
 import '/widgets/custom_fab.dart';
 
 class MapScreen extends ConsumerWidget {
