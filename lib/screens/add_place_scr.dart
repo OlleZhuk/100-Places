@@ -65,11 +65,10 @@ class AddPlaceScreen extends ConsumerWidget {
             pickedLocation,
           );
 
-      ///
+      /// Инициализация провайдеров
       ref.read(titleProvider.notifier).state = '';
       ref.read(imageFileProvider.notifier).state = null;
       ref.read(isCreatingLocationProvider.notifier).state = false;
-
       ref.read(selectedSourseProvider.notifier).state = '';
       ref.read(manualAddressProvider.notifier).state = '';
       ref.invalidate(pickedLocationProvider);
@@ -142,12 +141,11 @@ class AddPlaceScreen extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 48.0),
-                  child: Text(
-                    "ДА",
-                    style: TextStyle(color: cScheme.primary),
-                  ),
-                ),
+                    padding: const EdgeInsets.symmetric(horizontal: 48.0),
+                    child: Text(
+                      "ДА",
+                      style: TextStyle(color: cScheme.primary),
+                    )),
               )
             ],
           ).animate(delay: 500.ms).fadeIn(duration: 800.ms).scale(
@@ -157,7 +155,8 @@ class AddPlaceScreen extends ConsumerWidget {
       );
     }
 
-    //* Метод обнуления поставщиков кнопкой/жестом "Назад"
+    //* Метод инициализации провайдеров физической
+    //* кнопкой/жестом "Назад"
     Future<bool> backGesture() async {
       ref.read(titleProvider.notifier).state = '';
       ref.read(imageFileProvider.notifier).state = null;
@@ -170,8 +169,6 @@ class AddPlaceScreen extends ConsumerWidget {
       ref.invalidate(addressProvider);
       return true;
     }
-
-    // print('===> МСБ ЭДМ!!! ===');
 
     /// Экран Добавления Места
     return WillPopScope(
@@ -214,7 +211,6 @@ class AddPlaceScreen extends ConsumerWidget {
               children: [
                 //` Фоновая картинка
                 Image.asset('assets/images/landscape.webp'),
-                //
                 //` Название Места
                 Container(
                   width: double.infinity,
@@ -242,11 +238,9 @@ class AddPlaceScreen extends ConsumerWidget {
                                 ))),
                 ),
                 const Gap(gapV),
-                //
                 //` Изображение Места
                 const ImageInput(iconSz: iconSize),
                 const Gap(gapV),
-                //
                 //` Местоположение
                 const LocationInput(iconSz: iconSize),
                 const Gap(gapV * 10),
@@ -267,7 +261,7 @@ class AddPlaceScreen extends ConsumerWidget {
 
 //| ВИДЖЕТЫ:                             >
 
-//| _ImageInput_ -------------------------
+//| _ImageInput_
 class ImageInput extends ConsumerWidget {
   const ImageInput({
     super.key,
@@ -298,8 +292,6 @@ class ImageInput extends ConsumerWidget {
       ref.read(imageFileProvider.notifier).state = selectedImage;
     }
 
-    // print('=== МСБ ImageInput!!! ===');
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -326,7 +318,7 @@ class ImageInput extends ConsumerWidget {
                   )
                 : null,
           ),
-          //`
+          //`                                      >
           child: receivedImage == null
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -342,7 +334,8 @@ class ImageInput extends ConsumerWidget {
         //< Выбор источника >
         Column(
           children: [
-            //| Снимок
+            //
+            //^ Снимок
             InkWell(
               onTap: () {
                 isCamera = true;
@@ -358,7 +351,8 @@ class ImageInput extends ConsumerWidget {
               ),
             ),
             const Gap(gap * 2.5),
-            //| Галерея
+            //
+            //^ Галерея
             InkWell(
                 onTap: () {
                   isCamera = false;
@@ -378,7 +372,7 @@ class ImageInput extends ConsumerWidget {
   }
 }
 
-//| _LocationInput_ ----------------------
+//| _LocationInput_
 class LocationInput extends ConsumerWidget {
   const LocationInput({
     super.key,
@@ -410,11 +404,10 @@ class LocationInput extends ConsumerWidget {
       final lat = ref.watch(locationProvider).latitude;
       final lng = ref.watch(locationProvider).longitude;
 
-      /// 2. Получаем АДРЕС
-      // геокодер или ручной ввод
+      /// 2. Получаем АДРЕС через геокодер или ручной ввод
       //
-      final String selectedSourse = ref.watch(selectedSourseProvider);
       String? sourceAddress;
+      final String selectedSourse = ref.watch(selectedSourseProvider);
       final String address = ref.watch(addressProvider);
       final String manAddress = ref.watch(manualAddressProvider);
 
@@ -429,22 +422,18 @@ class LocationInput extends ConsumerWidget {
           sourceAddress = address;
           break;
       }
-      // print('===> getLocation ВЫДАЕТ: $sourceAddress');
 
-      /// 3. Представление полученных данных в модели локации
+      /// 3. Представление собранных данных в модели локации
       pickedLocation = PlaceLocation(
         latitude: lat,
         longitude: lng,
         address: sourceAddress,
       );
 
-      /// 4. Запись модели локации в поставщик локации
+      /// 4. Передача модели локации провайдеру
       if (pickedLocation != null) {
         ref.read(pickedLocationProvider.notifier).state = pickedLocation!;
-        ref.read(selectedSourseProvider.notifier).state = 'geo'; //!
       }
-
-      // print('=== ФЛАГ СОЗДАНИЯ ЛОКАЦИИ: ${ref.watch(isCreatingLocationProvider).toString()}');
     }
 
     //* Метод получения местоположения пользователя
@@ -558,18 +547,12 @@ class LocationInput extends ConsumerWidget {
                                 getLocation();
 
                                 Navigator.of(context).pop();
-
-                                // print('===> manuallyAddressInput ВЫДАЕТ: $manAddress');
                               }),
                         ],
                       ))));
         },
       );
     }
-
-    // print('===> ФЛАГ_isCreatingLocation: $isCreatingLocation');
-    // print('===> МСБ_LocationInput');
-    // print('=== Location $lat и $lng ===');
 
     return Column(
       children: [
@@ -621,7 +604,7 @@ class LocationInput extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             //
-            //| Текущее
+            //^ Текущее
             InkWell(
                 onTap: () {
                   if (selectedSourse == 'man') {
@@ -637,12 +620,11 @@ class LocationInput extends ConsumerWidget {
                 )),
             const Gap(gap),
 
-            //| На карте
+            //^ На карте
             InkWell(
                 onTap: () {
-                  // ref.invalidate(pickedLocationStreamAddressProvider);
                   if (selectedSourse == 'man') {
-                    ref.read(selectedSourseProvider.notifier).state = 'geo'; //!
+                    ref.read(selectedSourseProvider.notifier).state = 'geo';
                   }
                   getOnMapLocation();
                 },
@@ -653,7 +635,7 @@ class LocationInput extends ConsumerWidget {
                   ],
                 )),
 
-            //| Вручную
+            //^ Вручную
             Visibility(
               visible: isCreatingLocation && lat != 0 && lng != 0,
               child: const Gap(gap),
@@ -686,7 +668,7 @@ class LocationInput extends ConsumerWidget {
   }
 }
 
-//| _CustomClipPath_ ---------------------
+//| _CustomClipPath_
 class CustomClipPath extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

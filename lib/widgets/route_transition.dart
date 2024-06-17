@@ -1,4 +1,4 @@
-/// Конструктор Перехода, КП
+/// Конструктор Перехода
 library;
 
 import 'package:flutter/material.dart';

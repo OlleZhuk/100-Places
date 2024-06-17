@@ -1,3 +1,6 @@
+/// Main
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,12 +18,12 @@ final theme = ThemeData.dark().copyWith(
   visualDensity: VisualDensity.adaptivePlatformDensity,
   badgeTheme: BadgeThemeData(textColor: colorScheme.primary),
   iconTheme: IconThemeData(color: colorScheme.primary),
-  //
+  //^
   appBarTheme: AppBarTheme(
     backgroundColor: colorScheme.background,
     foregroundColor: colorScheme.primary,
   ),
-  //
+  //^
   scrollbarTheme: ScrollbarThemeData(
     interactive: true,
     minThumbLength: 70,
@@ -28,67 +31,64 @@ final theme = ThemeData.dark().copyWith(
     thumbColor: MaterialStatePropertyAll(colorScheme.primaryContainer),
     radius: const Radius.circular(4),
   ),
-  //
+  //^
   popupMenuTheme: PopupMenuThemeData(
     position: PopupMenuPosition.under,
     color: colorScheme.onPrimary,
     elevation: 6,
     textStyle: TextStyle(color: colorScheme.primary),
   ),
-  //
+  //^
   textTheme: ThemeData().textTheme.copyWith(
-        //^ labelText текстового поля
+        //` labelText текстового поля
         bodySmall: TextStyle(
           fontFamily: 'AlumniSans',
           fontSize: 18,
           color: colorScheme.primary.withOpacity(.75),
         ),
-        //^ текст экрана
+        //` текст экрана
         bodyMedium: TextStyle(
           color: colorScheme.tertiary.withOpacity(.8),
         ),
-        //
         displayLarge: TextStyle(
-          //^ слово "100"
+          //` слово "100"
           fontFamily: 'AlumniSans',
           fontWeight: FontWeight.w900,
           color: colorScheme.primaryContainer.withOpacity(.9),
         ),
         displayMedium: TextStyle(
-          //^ слово "МЕСТ"
+          //` слово "МЕСТ"
           fontFamily: 'AlumniSans',
           fontWeight: FontWeight.w900,
           color: colorScheme.background,
         ),
-        //
         headlineSmall: TextStyle(
           fontSize: 16,
           color: colorScheme.primary,
         ),
-        //
         titleSmall: TextStyle(
-          //^ названия на картинках
+          //` названия на картинках
           fontFamily: 'AlumniSans',
           color: colorScheme.tertiary,
           fontSize: 16,
         ),
         titleMedium: TextStyle(
-          //^_TextField_
+          //` _TextField_
           color: colorScheme.primary,
         ),
         titleLarge: TextStyle(
-          //^ заголовок в панели приложений
+          //` заголовок в панели приложений
           fontFamily: 'AlumniSans',
           color: colorScheme.primary,
           fontWeight: FontWeight.w200,
         ),
       ),
-  //
+  //^
   snackBarTheme: SnackBarThemeData(
     backgroundColor: Colors.transparent,
     contentTextStyle: TextStyle(color: colorScheme.tertiary),
   ),
-  //
+  //^
   filledButtonTheme: FilledButtonThemeData(
     style: FilledButton.styleFrom(
         elevation: 3,

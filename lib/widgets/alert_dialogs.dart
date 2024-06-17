@@ -4,7 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-/// _ConfirmAlert_
+//| Для _ConfirmAlert_
 class ConfirmAlert extends StatelessWidget {
   const ConfirmAlert({
     super.key,
@@ -32,12 +32,12 @@ class ConfirmAlert extends StatelessWidget {
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actionsPadding: const EdgeInsets.only(bottom: 24),
       actions: [
-        //> Нет
+        //` Нет
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text("Нет"),
         ),
-        //> Да
+        //` Да
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: cScheme.errorContainer,
@@ -58,8 +58,7 @@ class ConfirmAlert extends StatelessWidget {
   }
 }
 
-/// -----------------------------------------
-/// _WarningAlert_
+//| Для _WarningAlert_
 class WarningAlert extends StatelessWidget {
   const WarningAlert({
     super.key,

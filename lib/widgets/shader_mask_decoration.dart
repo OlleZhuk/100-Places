@@ -1,3 +1,6 @@
+/// Маска верхнего и нижнего затемнений
+library;
+
 import 'package:flutter/material.dart';
 
 class ShaderMaskDecoration extends StatelessWidget {
@@ -7,7 +10,7 @@ class ShaderMaskDecoration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cScheme = Theme.of(context).colorScheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
 
     return ShaderMask(
       shaderCallback: (Rect rect) => LinearGradient(
@@ -19,7 +22,7 @@ class ShaderMaskDecoration extends StatelessWidget {
           Colors.transparent,
           cScheme.background,
         ],
-        stops: const [0.0, 0.03, 0.87, 1.0], //^ 5% цвет, 79% transparent, 15% цвет
+        stops: const [0.0, 0.03, 0.87, 1.0],
       ).createShader(rect),
       blendMode: BlendMode.dstOut,
       child: child,

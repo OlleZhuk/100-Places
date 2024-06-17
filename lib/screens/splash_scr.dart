@@ -12,8 +12,8 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cScheme = Theme.of(context).colorScheme;
-    final tTheme = Theme.of(context).textTheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final TextTheme tTheme = Theme.of(context).textTheme;
 
     return FlutterSplashScreen(
         useImmersiveMode: true,

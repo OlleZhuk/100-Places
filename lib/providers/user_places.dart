@@ -25,19 +25,19 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
   ) async {
     var getDate = DateTime.now().toString();
 
-    /// Открыть базу
+    // Открыть базу
     final db = await getDatabase();
 
-    /// Задать путь сохранения
+    // Задать путь сохранения
     final appDir = await syspaths.getApplicationDocumentsDirectory();
 
-    /// Задать базовое имя файла
+    // Задать базовое имя файла
     final filename = path.basename(image.path);
 
-    /// Скопировать изображение, чтобы поместить его в каталог
+    // Скопировать изображение, чтобы поместить его в каталог
     final copiedImage = await image.copy('${appDir.path}/$filename');
 
-    /// Задать модель нового Места
+    // Задать модель нового Места
     final Place newPlace = Place(
       title: title,
       date: getDate,
@@ -45,7 +45,7 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
       location: location,
     );
 
-    /// Записать в БД все данные по новому месту
+    // Записать в БД все данные по новому месту
     db.insert('best_places', {
       'title': newPlace.title,
       'date': newPlace.date,
@@ -57,14 +57,14 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     state = [newPlace, ...state];
   }
 
-  //* Метод извлечения данных из ДБ
+  //* Метод извлечения данных из БД
   Future<void> loadPlaces() async {
     List<Place> result;
     result = await getData();
     state = result;
   }
 
-  //* Метод удаления данных из SQL ДБ
+  //* Метод удаления данных из БД
   Future removePlace(String date) async {
     final db = await getDatabase();
     List<Place> result;
@@ -78,15 +78,11 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     state = result;
   }
 
-  //* Метод очистки ДБ
+  //* Метод очистки БД
   Future<void> clearDB() async {
     List<Place> result;
-    // final db = await getDatabase();
-    try {
-      await sql.deleteDatabase("/data/user/0/com.example.favorite_places_13/databases/100_places.db");
-    } on Exception {
-      print('======== $onError');
-    }
+
+    await sql.deleteDatabase("/data/user/0/com.example.favorite_places_13/databases/100_places.db");
     result = await getData();
     state = result;
   }
@@ -147,8 +143,8 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
   }
 }
 
-/// ВИДЖЕТЫ
-///-----------------------------------
+//| МЕТОДЫ внутреннего значения                >
+
 //* Запрос данных из БД
 Future<List<Place>> getData() async {
   final db = await getDatabase();
@@ -169,18 +165,16 @@ Future<List<Place>> getData() async {
   return places;
 }
 
-///-----------------------------------
 //* Инициализация БД
 Future<Database> getDatabase() async {
   final dbPath = await sql.getDatabasesPath();
-  print('DB Path ======>> $dbPath');
-  /*
+  // print('DB Path ======>> $dbPath');
+  /* полученный адрес:
   /data/user/0/com.example.favorite_places_13/databases
   */
-  Directory? extDir = await syspaths.getExternalStorageDirectory();
-  print('DB extDir ======>> $extDir');
-
-  /*
+  // Directory? extDir = await syspaths.getExternalStorageDirectory();
+  // print('DB extDir ======>> $extDir');
+  /* полученный адрес:
   /storage/emulated/0/Android/data/com.example.favorite_places_13/files
   */
 

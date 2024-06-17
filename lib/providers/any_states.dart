@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 //* ФЛАГИ _bool_ ----------------------------------
 
-//` Флаг для корректного названия на ЭИМ
+//` Флаг для корректного названия на ЭДИ
 final isEditTitleProvider = StateProvider<bool>((ref) => false);
 
 //` Флаг для режима создания локации
@@ -21,7 +21,7 @@ final onGetAddressProvider = StateProvider<bool>((ref) => false);
 
 //* _String_ ДАННЫЕ ----------------------------------
 
-//` Поставщик названия для ЭИМ (при редактировании)
+//` Поставщик названия для ЭДИ (при редактировании)
 final titleProvider = StateProvider<String>((ref) => '');
 
 //` Поставщик даты для обеспечения обновлений БД

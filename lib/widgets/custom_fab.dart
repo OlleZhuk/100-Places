@@ -1,3 +1,6 @@
+/// Кнопка
+library;
+
 import 'package:flutter/material.dart';
 
 class CustomFAB extends StatelessWidget {
@@ -14,7 +17,7 @@ class CustomFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.sizeOf(context).width;
+    final double deviceSize = MediaQuery.sizeOf(context).width;
 
     return SizedBox(
       width: deviceSize * .9,

@@ -1,3 +1,4 @@
+/// Экран информации, ЭИ
 library;
 
 import 'package:flutter/gestures.dart';
@@ -13,6 +14,7 @@ import '/widgets/shader_mask_decoration.dart';
 class AppInfo extends StatelessWidget {
   const AppInfo({super.key});
 
+  //* Метод обращения к Условиям использования Я.Карт (требование)
   launchURL() async {
     Uri url = Uri.parse('https://yandex.ru/legal/maps_termsofuse/');
     if (await launchUrl(url)) {
@@ -92,6 +94,7 @@ class AppInfo extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
+          //`
           SliverAppBar(
               expandedHeight: 200,
               backgroundColor: cScheme.background,
@@ -129,7 +132,9 @@ class AppInfo extends StatelessWidget {
                       ),
                     ],
                   )))),
+          //`
           const SliverToBoxAdapter(child: Gap(10)),
+          //`
           SliverToBoxAdapter(
               child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -159,6 +164,7 @@ class AppInfo extends StatelessWidget {
                           curve: Curves.easeOutQuad,
                         ),
                   ))),
+          //`
           const SliverToBoxAdapter(child: Gap(200)),
         ],
       ),

@@ -156,10 +156,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
       ],
     );
 
-    // print('=== МСБ ЭСМ!!! ===');
-    // print('=== $horPadds ===');
-
-    //| Экран Списка Мест
+    /// Экран Списка Мест
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: toolbarH,
@@ -205,7 +202,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 
 //| ВИДЖЕТЫ:                             >
 //
-//| _MainContent_ ------------------------
+//| _MainContent_
 class MainContent extends ConsumerWidget {
   const MainContent({
     super.key,
@@ -222,8 +219,8 @@ class MainContent extends ConsumerWidget {
     final List<Place> userPlaces = ref.watch(userPlacesProvider);
     final ScrollController scrollController = ScrollController();
     final double imageWidth = deviceWidth * .42;
-    final double offsetX = imageWidth * .92; //0.3864
-    final double offsetY = imageWidth * .8; //0.336
+    final double offsetX = imageWidth * .92;
+    final double offsetY = imageWidth * .8;
     final double maxCAE = deviceWidth * .51;
 
     //^ Варианты сортировки
@@ -244,8 +241,6 @@ class MainContent extends ConsumerWidget {
         userPlaces.sort((b, a) => a.date.compareTo(b.date));
         break;
     }
-
-    // print('=== МСБ MainContent ЭСМ!!! ===');
 
     //^ Сетка картинок и скролл-бар
     return Scrollbar(

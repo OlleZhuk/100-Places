@@ -20,7 +20,8 @@ class MapScreen extends ConsumerWidget {
     final toolbarH = MediaQuery.sizeOf(context).height * .1;
     final Orientation orientation = MediaQuery.orientationOf(context);
 
-    //* Метод обнуления поставщиков физической кнопкой/жестом "Назад"
+    //* Метод инициализации провайдеров физической
+    //* кнопкой/жестом "Назад"
     Future<bool> backGesture() async {
       //` Возврат на ЭДМ без сохранения введённых/полученных данных
       ref.invalidate(addressProvider);
@@ -29,8 +30,6 @@ class MapScreen extends ConsumerWidget {
 
       return true;
     }
-
-    // print('=== МСБ ЭК!!! ===');
 
     return WillPopScope(
       /*
@@ -58,7 +57,7 @@ class MapScreen extends ConsumerWidget {
             toolbarHeight: toolbarH,
             leading: BackButton(
               onPressed: () {
-                //` Возврат на ЭДМ без сохранения введённых/полученных данных
+                // Возврат на ЭДМ без сохранения введённых/полученных данных
                 ref.invalidate(addressProvider);
                 ref.invalidate(locationProvider);
                 ref.read(onGetAddressProvider.notifier).state = false;
@@ -75,16 +74,16 @@ class MapScreen extends ConsumerWidget {
             labelText: 'Получить адрес',
             buttonIcon: Icons.not_listed_location,
             action: () async {
-              Point? pickedLocation = ref.watch(locationProvider);
               ref.read(onGetAddressProvider.notifier).state = true;
 
+              Point? pickedLocation = ref.watch(locationProvider);
               await ref.read(addressProvider.notifier).getAddress(
                     pickedLocation!.latitude,
                     pickedLocation.longitude,
                   );
             }),
 
-        //^ Отображение адреса
+        //^ Бокс отображения адреса
         bottomNavigationBar: const OnMapAddressView(),
       ),
     );
@@ -93,7 +92,7 @@ class MapScreen extends ConsumerWidget {
 
 //| ВИДЖЕТЫ:                                   >
 //
-//| Виджет отображения адреса
+//| _OnMapAddressView_
 class OnMapAddressView extends ConsumerWidget {
   const OnMapAddressView({super.key});
 
@@ -105,8 +104,6 @@ class OnMapAddressView extends ConsumerWidget {
     final String startPointAddress = ref.watch(startPointProvider).address;
     final bool isGettingAddress = ref.watch(onGetAddressProvider);
     final String currentDate = ref.watch(dateProvider);
-
-    // print('=== МСБ OnMapAddressView!!! ===');
 
     return Card(
         color: Colors.transparent,
@@ -135,7 +132,7 @@ class OnMapAddressView extends ConsumerWidget {
                       error: (e, st) => Text(address),
                     ))),
 
-            //` Мигающая кнопка сохранения
+            //^ Мигающая кнопка сохранения
             Visibility(
                 visible: isGettingAddress ? true : false,
                 child: IconButton(
@@ -157,14 +154,17 @@ class OnMapAddressView extends ConsumerWidget {
                           duration: 1.seconds,
                         ),
                     onPressed: () async {
-                      Point pickedLocation = ref.watch(locationProvider);
                       bool isCreatingLocation = ref.watch(isCreatingLocationProvider);
 
+                      //` Если добавляем новое Место - возвращаемся на ЭДМ
                       if (isCreatingLocation) {
-                        Navigator.of(context).pop(pickedLocation);
+                        Navigator.of(context).pop();
                       } else {
-                        //` Обновляем данные о локации в БД
+                        //
+                        //` Если меняем местоположение - обновляем БД...
                         if (address.isNotEmpty && currentDate.isNotEmpty) {
+                          Point pickedLocation = ref.watch(locationProvider);
+
                           await ref.read(userPlacesProvider.notifier).updateLocation(
                                 pickedLocation.latitude.toString(),
                                 pickedLocation.longitude.toString(),
@@ -172,22 +172,23 @@ class OnMapAddressView extends ConsumerWidget {
                                 currentDate,
                               );
                         }
-
+                        //` ...и возврашаемся на ЭДИ
                         if (context.mounted) Navigator.of(context).pop();
                       }
+                      //
                       //` Инициализация провайдеров
-                      ref.read(onGetAddressProvider.notifier).state = false;
                       /*
-                      При сохранении не обнуляются _addressProvider_  
-                      и _locationProvider_, т.к. дальше их данные нужны на ЭДМ
+                        Здесь при сохранении _addressProvider_ и _locationProvider_
+                        не обнуляются, т.к. их данные нужны потом на ЭДМ
                       */
+                      ref.read(onGetAddressProvider.notifier).state = false;
                     }))
           ],
         ));
   }
 }
 
-//| Виджет Яндекс.Карт
+//| _YanMapLocation_
 class YanMapLocation extends ConsumerStatefulWidget {
   const YanMapLocation({super.key});
 
@@ -205,11 +206,12 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
 
   late YandexMapController controller;
   final MapObjectId cameraMapObjectId = const MapObjectId('camera_placemark');
+
   late final List<MapObject> mapObjects = [
     PlacemarkMapObject(
       mapId: cameraMapObjectId,
 
-      //* Стартовая точка
+      //` Стартовая точка
       /* НЕ редактируем -- Москва,
          редактируем -- текущий адрес Места 
       */
@@ -217,7 +219,7 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
         latitude: isCreatingLocation ? 55.755848 : startLat,
         longitude: isCreatingLocation ? 37.620409 : startLng,
       ),
-      //* ----------------
+      //` ----------------
       //
       icon: PlacemarkIcon.single(PlacemarkIconStyle(
         image: BitmapDescriptor.fromAssetImage('assets/images/location_icon.webp'),
@@ -261,9 +263,13 @@ class ConsumerYanMapLocationState extends ConsumerState<YanMapLocation> {
               longitude: pickedL!.longitude,
             );
           });
+          //` Передача координат провайдеру.
+          /*  Затем эти координаты передаются в геокодер при нажатии
+              кнопки ПОЛУЧИТЬ АДРЕС и также в режиме изменения 
+              местоположения вызываются мигающей кнопкой СОХРАНИТЬ
+              для записи обновлений в БД
+          */
           ref.read(locationProvider.notifier).state = pickedLoc!;
-          //
-          // print('${pickedLoc!.latitude}, ${pickedLoc!.longitude}');
         },
       );
 }

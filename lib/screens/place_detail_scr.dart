@@ -104,11 +104,10 @@ class PlaceDetailScreen extends ConsumerWidget {
                         ref.read(titleProvider.notifier).state = enteredTitle;
 
                         await ref.read(userPlacesProvider.notifier).updateTitle(
-                              enteredTitle, // title
-                              place.date, // date
+                              enteredTitle,
+                              place.date,
                             );
 
-                        // ref.read(isEditTitleProvider.notifier).state = false;
                         if (context.mounted) Navigator.of(context).pop();
                       },
                     ),
@@ -153,20 +152,18 @@ class PlaceDetailScreen extends ConsumerWidget {
     }
 
     //* Метод удаления Места (диалог)
-    Future<void> removePlace() async {
-      await showDialog(
-          context: context,
-          builder: (context) => ConfirmAlert(
-              question: 'На самом деле удалить?',
-              event: () {
-                ref.read(userPlacesProvider.notifier).removePlace(
-                      place.date,
-                    );
-                Navigator.of(context)
-                  ..pop()
-                  ..pop();
-              }));
-    }
+    Future<void> removePlace() async => await showDialog(
+        context: context,
+        builder: (context) => ConfirmAlert(
+            question: 'На самом деле удалить?',
+            event: () {
+              ref.read(userPlacesProvider.notifier).removePlace(
+                    place.date,
+                  );
+              Navigator.of(context)
+                ..pop()
+                ..pop();
+            }));
 
     //* Список пунктов меню
     final List<PopupMenuEntry> getMenuItems = <PopupMenuEntry<dynamic>>[
@@ -215,7 +212,7 @@ class PlaceDetailScreen extends ConsumerWidget {
       itemBuilder: (BuildContext ctx) => getMenuItems,
     );
 
-    //* Метод обнуления поставщиков кнопкой/жестом "Назад"
+    //* Метод мнмцмализации провайдеров кнопкой/жестом "Назад"
     Future<bool> backGesture() async {
       ref.read(titleProvider.notifier).state = '';
       ref.read(isEditTitleProvider.notifier).state = false;
@@ -223,8 +220,6 @@ class PlaceDetailScreen extends ConsumerWidget {
 
       return true;
     }
-
-    // print('=== МСБ ЭИМ!!! ===');
 
     /// Экран Детальной Информации
     return WillPopScope(
@@ -280,9 +275,9 @@ class PlaceDetailScreen extends ConsumerWidget {
   }
 }
 
-/// ВИДЖЕТЫ --------------------------------
-///
-/// Виджет отображения названия
+//| ВИДЖЕТЫ                             >
+
+//| _TitleView_
 class TitleView extends ConsumerWidget {
   const TitleView({
     super.key,
@@ -324,7 +319,7 @@ class TitleView extends ConsumerWidget {
   }
 }
 
-/// Виджет отображения адреса
+//| _OnDetailsAddressView_ Виджет отображения адреса
 class OnDetailsAddressView extends ConsumerWidget {
   const OnDetailsAddressView({
     super.key,
