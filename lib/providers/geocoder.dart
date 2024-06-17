@@ -21,7 +21,7 @@ class GetAddress extends StateNotifier<String> {
     double lng,
   ) async {
     String address = '';
-    final geo = YandexGeocoder(apiKey: '60c7f14a-95e8-4d8b-9b03-b17e48c72f40');
+    final geo = YandexGeocoder(apiKey: 'xxxxx');
 
     const error = '⛔НЕПРЕДВИДЕННАЯ ОШИБКА!';
     const err403 = '⛔АДРЕС НЕ ПОЛУЧЕН!\n'

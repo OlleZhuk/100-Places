@@ -36,7 +36,7 @@ class AppInfo extends StatelessWidget {
 
     final List<Widget> topics = [
       Text(
-        'Коллекция "100 Мест", версия 1.1.2',
+        'Коллекция "100 Мест", версия 1.1.3',
         style: fontStyle,
       ),
       Text(
