@@ -1,4 +1,3 @@
-/// Экран "О приложении", ЭОП
 library;
 
 import 'package:flutter/gestures.dart';
@@ -17,7 +16,7 @@ class AppInfo extends StatelessWidget {
   launchURL() async {
     Uri url = Uri.parse('https://yandex.ru/legal/maps_termsofuse/');
     if (await launchUrl(url)) {
-      await launchUrl(url);
+      launchUrl(url);
     } else {
       throw 'Could not launch $url';
     }
@@ -25,45 +24,69 @@ class AppInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cScheme = Theme.of(context).colorScheme;
-    final tTheme = Theme.of(context).textTheme;
+    final ColorScheme cScheme = Theme.of(context).colorScheme;
+    final TextTheme tTheme = Theme.of(context).textTheme;
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final double deviceH = MediaQuery.sizeOf(context).height;
 
-    // Widget topicText(String data) => Text(
-    //       data,
-    //       textScaleFactor: 1,
-    //     );
+    final double fontSz = orientation == Orientation.portrait ? deviceH * .018 : deviceH * .036;
+    final TextStyle fontStyle = TextStyle(fontSize: fontSz);
 
     final List<Widget> topics = [
-      const Text('Коллекция "100 Мест", версия 1.1.1'),
-      const Text('Это приложение для сбора и временного хранения коллекции тех самых мест, пребывание в которых произвело на вас неизгладимое впечатление.'),
-      const Text('Временное хранение означает, что после очистки коллекции или после удаления приложения восстановить коллекцию не получится.'),
-      const Text('Однако при этом под рукой всегда остаётся функция "Поделиться", чтобы не потерять самые важные Места.'),
+      Text(
+        'Коллекция "100 Мест", версия 1.1.2',
+        style: fontStyle,
+      ),
+      Text(
+        'Приложение позволяет собрать и временно хранить коллекцию тех самых мест, пребывание в которых произвело на пользователя неизгладимое впечатление.',
+        style: fontStyle,
+      ),
+      Text(
+        'Временное хранение означает, что после полной очистки коллекции или после удаления приложения восстановить коллекцию не получится.',
+        style: fontStyle,
+      ),
+      Text(
+        'Однако у пользователя под рукой всегда остаётся функция "Поделиться", чтобы не потерять самые важные Места.',
+        style: fontStyle,
+      ),
+      Text(
+        'Любимое Место оформляется как изображение с названием и адресом, который выдаётся автоматически Яндекс.Картами или добавляется вручную.',
+        style: fontStyle,
+      ),
       RichText(
         text: TextSpan(
-          style: TextStyle(
-            fontSize: 16,
-            color: cScheme.tertiary.withOpacity(.8),
-          ),
+          style: TextStyle(color: cScheme.tertiary.withOpacity(.8), fontSize: fontSz * 1.17),
           children: [
             const TextSpan(
-              text: 'Сервис Яндекс.Карты, который используется в соответствии с принятыми ',
+              text: 'Сервис "Яндекс.Карты", который используется в соответствии с принятыми ',
             ),
             TextSpan(
               text: 'условиями, ',
               style: TextStyle(
+                fontSize: fontSz * 1.17,
                 color: cScheme.primaryContainer,
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()..onTap = () => launchURL(),
             ),
             const TextSpan(
-              text: 'вообще рекомендует хранить полученный адрес не более 30 дней.',
+              text: 'рекомендует пользователю хранить полученный адрес не более 30 дней.',
             ),
           ],
         ),
       ),
-      const Text('Если сегодня сервис Яндекс.Карты не выдаёт адрес по запросу, вероятнее всего, он выдаст его завтра. Чтобы не ждать, просто добавьте адрес местоположения вручную.'),
-      const Text('Разработчик разделяет удивление и негодование пользователя, получившего от Яндекс.Карт адрес с принадлежностью новых федеральных регионов по-прежнему Украине.'),
+      Text(
+        'В случае, когда Яндекс.Карты не выдают адрес из-за окончания суточного лимита адресов, можно добавить адрес Места вручную.',
+        style: fontStyle,
+      ),
+      Text(
+        'Коллекция "100 Мест" в целях безопасности хранится только на устройстве, поэтому пользователь остаётся единственной персоной, имеющей к ней доступ.',
+        style: fontStyle,
+      ),
+      Text(
+        'Разработчик разделяет удивление и негодование пользователя, получившего от Яндекс.Карт адрес с принадлежностью новых федеральных регионов по-прежнему Украине.',
+        style: fontStyle,
+      ),
     ];
 
     return Scaffold(
@@ -118,7 +141,6 @@ class AppInfo extends StatelessWidget {
                       style: BulletStyle.discFill,
                       iconColor: cScheme.tertiary.withOpacity(.7),
                       iconSize: 5,
-                      // customBullet: const Text('🔥'),
                       gap: 10,
                       items: topics,
                     )
@@ -137,54 +159,8 @@ class AppInfo extends StatelessWidget {
                           curve: Curves.easeOutQuad,
                         ),
                   ))),
-          const SliverToBoxAdapter(child: Gap(10)),
-          const SliverToBoxAdapter(child: MediaQueryImplementation()),
-          const SliverToBoxAdapter(child: Gap(100)),
+          const SliverToBoxAdapter(child: Gap(200)),
         ],
-      ),
-    );
-  }
-}
-
-/// MediaQuery implementation
-class MediaQueryImplementation extends StatelessWidget {
-  const MediaQueryImplementation({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final Size virtualScreenSize = MediaQuery.sizeOf(context);
-    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final double currentDPI = 160 * pixelRatio;
-    final Size realScreenSize = virtualScreenSize * pixelRatio;
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
-    final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-    final EdgeInsets padding = MediaQuery.paddingOf(context);
-    final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(context);
-    final EdgeInsets systemGestureInsets = MediaQuery.systemGestureInsetsOf(context);
-    final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
-    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
-    final bool invertColors = MediaQuery.invertColorsOf(context);
-    final bool highContrast = MediaQuery.highContrastOf(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
-      child: SizedBox(
-        child: Text('=====================\n'
-            'Служебная информация\n'
-            '------------------------------------------\n'
-            'Real screen size, RSS: $realScreenSize\n'
-            'Device pixel ratio, DPR: $pixelRatio\n'
-            'Virtual screen size, VSS: $virtualScreenSize\n'
-            'CurrentDPI: $currentDPI\n'
-            'Text scale factor: $textScaleFactor\n'
-            'Platform brightness: $platformBrightness\n'
-            'Padding: $padding\n'
-            'View insets: $viewInsets\n'
-            'System gesture insets: $systemGestureInsets\n'
-            'Always use 24-hour format: $alwaysUse24HourFormat\n'
-            'Accessible navigation: $accessibleNavigation\n'
-            'Invert colors: $invertColors\n'
-            'High contrast: $highContrast\n'),
       ),
     );
   }
